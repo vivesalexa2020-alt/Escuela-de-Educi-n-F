@@ -2,268 +2,331 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinanzaLab | Educación financiera</title>
-    <link rel="stylesheet" href="estilos.css">
-    <script src="script.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FinanzaLab, escuela virtual de educación financiera.">
+  <title>FinanzaLab | Escuela Financiera</title>
+  <link rel="stylesheet" href="estilos.css">
+  <script src="script.js" defer></script>
 </head>
 <body>
 
-    <!-- MENÚ LATERAL -->
-    <aside class="barra-lateral" id="barraLateral">
-        <a href="#inicio" class="logo">
-            <span class="logo-icono">F</span>
-            <span>Finanza<span class="logo-verde">Lab</span></span>
-        </a>
+  <!-- MENÚ LATERAL -->
+  <aside class="barra-lateral">
+    <a href="#inicio" class="logo">
+      <span class="logo-icono">F</span>
+      <span>Finanza<span class="texto-verde">Lab</span></span>
+    </a>
 
-        <p class="menu-titulo">MENÚ PRINCIPAL</p>
+    <p class="menu-titulo">MENÚ PRINCIPAL</p>
 
-        <nav class="navegacion">
-            <a href="#inicio" class="enlace-menu activo">
-                <span>⌂</span> Inicio
-            </a>
-            <a href="#cursos" class="enlace-menu">
-                <span>▤</span> Aprender
-            </a>
-            <a href="#ahorro" class="enlace-menu">
-                <span>◉</span> Herramientas
-            </a>
-            <a href="#quiz" class="enlace-menu">
-                <span>✓</span> Cuestionario
-            </a>
-        </nav>
+    <nav class="navegacion" id="navegacion">
+      <a href="#inicio" class="enlace-menu activo"><span>⌂</span> Inicio</a>
+      <a href="#nosotros" class="enlace-menu"><span>▤</span> Nuestra escuela</a>
+      <a href="#reticula" class="enlace-menu"><span>▦</span> Retícula académica</a>
+      <a href="#gastos" class="enlace-menu"><span>↗</span> Gastos hormiga</a>
+      <a href="#ahorro" class="enlace-menu"><span>♧</span> Mi ahorro</a>
+    </nav>
 
-        <div class="lateral-inferior">
-            <div class="icono-planta">🌱</div>
-            <strong>Crece a tu ritmo</strong>
-            <p>Pequeños pasos, grandes metas.</p>
-        </div>
-    </aside>
-
-    <!-- ENCABEZADO SUPERIOR -->
-    <header class="encabezado-superior">
-        <button class="menu-toggle" id="menuToggle"
-                aria-label="Abrir menú" aria-expanded="false">☰</button>
-        <span>Tu espacio de educación financiera</span>
-        <a href="#cursos" class="boton boton-pequeno">Comenzar</a>
-    </header>
-
-    <main>
-        <!-- INICIO -->
-        <section class="hero" id="inicio">
-            <div class="hero-contenido">
-                <span class="etiqueta">TU FUTURO COMIENZA HOY</span>
-                <h1>Aprende a manejar tu dinero y <span>crece sin límites.</span></h1>
-                <p>
-                    Aprende sobre ahorro, presupuesto y finanzas personales
-                    de una manera sencilla y práctica.
-                </p>
-                <div class="hero-botones">
-                    <a href="#cursos" class="boton">Explorar cursos →</a>
-                    <a href="#ahorro" class="boton boton-secundario">Calcular mi ahorro</a>
-                </div>
-                <div class="hero-datos">
-                    <div><strong>01</strong><span>Aprende</span></div>
-                    <div><strong>02</strong><span>Organiza</span></div>
-                    <div><strong>03</strong><span>Crece</span></div>
-                </div>
-            </div>
-
-            <div class="hero-visual">
-                <div class="tarjeta-grafica">
-                    <div class="grafica-superior">
-                        <span>Tu progreso financiero</span>
-                        <span class="punto-verde">●</span>
-                    </div>
-                    <p class="grafica-titulo">Construye tus metas</p>
-                    <div class="grafica-barras">
-                        <div class="barra barra-1"></div>
-                        <div class="barra barra-2"></div>
-                        <div class="barra barra-3"></div>
-                        <div class="barra barra-4"></div>
-                        <div class="barra barra-5"></div>
-                        <div class="barra barra-6"></div>
-                        <div class="barra barra-7"></div>
-                    </div>
-                    <div class="grafica-pie">
-                        <span>Constancia</span>
-                        <strong>Tu mejor inversión</strong>
-                    </div>
-                </div>
-                <div class="burbuja burbuja-arriba">✦ Aprende algo nuevo</div>
-                <div class="burbuja burbuja-abajo">🌿 Paso a paso</div>
-            </div>
-        </section>
-
-        <!-- BENEFICIOS -->
-        <section class="seccion beneficios">
-            <div class="encabezado-seccion">
-                <span class="etiqueta">¿POR QUÉ FINANZALAB?</span>
-                <h2>Finanzas más fáciles para todos</h2>
-                <p>Comienza con conceptos sencillos que puedes aplicar todos los días.</p>
-            </div>
-
-            <div class="rejilla-beneficios">
-                <article class="tarjeta-beneficio">
-                    <div class="icono-tarjeta">📚</div>
-                    <h3>Aprende fácil</h3>
-                    <p>Entiende los conceptos financieros con explicaciones sencillas.</p>
-                </article>
-                <article class="tarjeta-beneficio">
-                    <div class="icono-tarjeta">🎯</div>
-                    <h3>Organiza tus metas</h3>
-                    <p>Define objetivos y descubre cómo avanzar poco a poco.</p>
-                </article>
-                <article class="tarjeta-beneficio">
-                    <div class="icono-tarjeta">📈</div>
-                    <h3>Mejora tus hábitos</h3>
-                    <p>Aprende a tomar decisiones más responsables con tu dinero.</p>
-                </article>
-            </div>
-        </section>
-
-        <!-- CURSOS -->
-        <section class="seccion seccion-cursos" id="cursos">
-            <div class="encabezado-seccion encabezado-flex">
-                <div>
-                    <span class="etiqueta">APRENDE A TU RITMO</span>
-                    <h2>Explora nuestros cursos</h2>
-                    <p>Elige un tema y comienza a aprender.</p>
-                </div>
-            </div>
-
-            <div class="rejilla-cursos">
-                <article class="tarjeta-curso">
-                    <div class="curso-imagen imagen-ahorro">🐷</div>
-                    <div class="curso-contenido">
-                        <span class="curso-categoria">PRINCIPIANTES</span>
-                        <h3>El arte del ahorro</h3>
-                        <p>Descubre cómo guardar dinero y prepararte para tus metas.</p>
-                        <button class="boton-curso" data-curso="ahorro">Ver lección <span>→</span></button>
-                    </div>
-                </article>
-
-                <article class="tarjeta-curso">
-                    <div class="curso-imagen imagen-presupuesto">📝</div>
-                    <div class="curso-contenido">
-                        <span class="curso-categoria">ORGANIZACIÓN</span>
-                        <h3>Tu primer presupuesto</h3>
-                        <p>Aprende a organizar tus ingresos y controlar tus gastos.</p>
-                        <button class="boton-curso" data-curso="presupuesto">Ver lección <span>→</span></button>
-                    </div>
-                </article>
-
-                <article class="tarjeta-curso">
-                    <div class="curso-imagen imagen-metas">🎯</div>
-                    <div class="curso-contenido">
-                        <span class="curso-categoria">PLANIFICACIÓN</span>
-                        <h3>Metas financieras</h3>
-                        <p>Convierte tus objetivos en un plan con pasos alcanzables.</p>
-                        <button class="boton-curso" data-curso="metas">Ver lección <span>→</span></button>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- CALCULADORA -->
-        <section class="seccion seccion-ahorro" id="ahorro">
-            <div class="calculadora">
-                <div class="calculadora-texto">
-                    <span class="etiqueta">HERRAMIENTA GRATUITA</span>
-                    <h2>Tu ahorro, tus metas</h2>
-                    <p>Calcula cuánto puedes reunir si guardas una cantidad fija cada mes.</p>
-                    <div class="consejo">
-                        <span>💡</span>
-                        <p><strong>Consejo:</strong> comienza con una cantidad que puedas mantener sin descuidar tus necesidades.</p>
-                    </div>
-                </div>
-
-                <div class="calculadora-formulario">
-                    <label for="cantidad">¿Cuánto ahorrarás cada mes?</label>
-                    <div class="campo-dinero">
-                        <span>$</span>
-                        <input type="number" id="cantidad" min="0" step="50" value="500">
-                        <span>MXN</span>
-                    </div>
-
-                    <label for="meses">¿Durante cuánto tiempo?</label>
-                    <select id="meses">
-                        <option value="3">3 meses</option>
-                        <option value="6">6 meses</option>
-                        <option value="12" selected>12 meses</option>
-                        <option value="24">24 meses</option>
-                        <option value="36">36 meses</option>
-                    </select>
-
-                    <button class="boton boton-ancho" id="calcular">Calcular mi ahorro</button>
-
-                    <div class="resultado-ahorro" aria-live="polite">
-                        <span>Podrías reunir</span>
-                        <strong id="resultado">$6,000</strong>
-                        <p id="detalleResultado">En 12 meses, sin considerar intereses.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CUESTIONARIO -->
-        <section class="seccion seccion-quiz" id="quiz">
-            <div class="encabezado-seccion">
-                <span class="etiqueta">PON A PRUEBA LO APRENDIDO</span>
-                <h2>¿Qué tanto sabes de finanzas?</h2>
-                <p>Responde estas preguntas y descubre cuánto has aprendido.</p>
-            </div>
-
-            <div class="tarjeta-quiz">
-                <div class="quiz-progreso">
-                    <span id="numeroPregunta">Pregunta 1 de 3</span>
-                    <span id="puntuacion">Puntos: 0</span>
-                </div>
-                <div class="progreso-fondo">
-                    <div class="progreso-relleno" id="progresoRelleno"></div>
-                </div>
-                <h3 id="pregunta">¿Qué significa ahorrar?</h3>
-                <div class="opciones-quiz" id="opcionesQuiz"></div>
-                <p class="mensaje-quiz" id="mensajeQuiz" aria-live="polite"></p>
-                <button class="boton" id="siguientePregunta" disabled>Siguiente pregunta →</button>
-                <div id="resultadoQuiz" class="resultado-quiz" hidden></div>
-                <button class="boton boton-secundario" id="reiniciarQuiz" hidden>Volver a intentarlo</button>
-            </div>
-        </section>
-
-        <!-- MENSAJE FINAL -->
-        <section class="llamada-final">
-            <div>
-                <span class="etiqueta etiqueta-clara">TU FUTURO FINANCIERO</span>
-                <h2>Todo gran cambio comienza con un pequeño paso.</h2>
-                <p>Aprende. Organiza. Crece.</p>
-            </div>
-            <a href="#cursos" class="boton boton-blanco">Comenzar ahora →</a>
-        </section>
-    </main>
-
-    <!-- PIE DE PÁGINA -->
-    <footer class="pie">
-        <a href="#inicio" class="logo logo-pie">
-            <span class="logo-icono">F</span>
-            <span>Finanza<span class="logo-verde">Lab</span></span>
-        </a>
-        <p>Educación financiera para construir un mejor futuro.</p>
-        <span>© 2026 FinanzaLab. Proyecto educativo.</span>
-    </footer>
-
-    <!-- VENTANA DE LAS LECCIONES -->
-    <div class="modal" id="modalCurso" aria-hidden="true">
-        <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="tituloModal">
-            <button class="cerrar-modal" id="cerrarModal" aria-label="Cerrar ventana">×</button>
-            <span class="etiqueta">MINI LECCIÓN</span>
-            <h2 id="tituloModal">Aprende sobre finanzas</h2>
-            <p id="textoModal"></p>
-            <div class="actividad-modal" id="actividadModal"></div>
-            <button class="boton" id="terminarLeccion">¡Entendido!</button>
-        </div>
+    <div class="lateral-inferior">
+      <div class="mensaje-lateral">
+        <span>✦</span>
+        <strong>Tu futuro financiero comienza aquí.</strong>
+        <p>Aprende algo nuevo cada día.</p>
+      </div>
+      <small>FinanzaLab · Escuela financiera</small>
     </div>
+  </aside>
+
+  <button class="menu-toggle" id="menu-toggle"
+    aria-label="Abrir menú" aria-expanded="false">☰</button>
+
+  <main>
+    <!-- INICIO -->
+    <section class="hero" id="inicio">
+      <div class="hero-contenido">
+        <span class="etiqueta">TU FUTURO COMIENZA HOY</span>
+        <h1>Aprende a manejar tu dinero y construye un <span class="texto-verde">mejor futuro.</span></h1>
+        <p>
+          Bienvenido a FinanzaLab, una escuela virtual donde aprenderás
+          a controlar tus gastos, desarrollar el hábito del ahorro
+          y conocer cómo funcionan las inversiones.
+        </p>
+
+        <div class="hero-botones">
+          <a href="#reticula" class="boton">Explorar la escuela →</a>
+          <a href="#gastos" class="boton boton-secundario">Controlar mis gastos</a>
+        </div>
+
+        <div class="hero-datos">
+          <div><strong>03</strong><span>Niveles de aprendizaje</span></div>
+          <div><strong>A tu ritmo</strong><span>Aprende paso a paso</span></div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="tarjeta-bienvenida">
+          <div class="circulo-icono">↗</div>
+          <span class="texto-claro">TU PROGRESO FINANCIERO</span>
+          <h2>Pequeños pasos, grandes cambios.</h2>
+          <div class="barra-progreso">
+            <div class="barra-relleno" id="progreso-general"></div>
+          </div>
+          <div class="progreso-detalle">
+            <span>Tu aprendizaje</span>
+            <strong id="progreso-texto">0%</strong>
+          </div>
+          <div class="mini-estadisticas">
+            <div><span>Gastos registrados</span><strong id="hero-gastos">0</strong></div>
+            <div><span>Meta de ahorro</span><strong id="hero-ahorro">$0</strong></div>
+          </div>
+        </div>
+        <div class="decoracion decoracion-uno"></div>
+        <div class="decoracion decoracion-dos"></div>
+      </div>
+    </section>
+
+    <!-- NUESTRA ESCUELA -->
+    <section class="seccion seccion-centro" id="nosotros">
+      <span class="etiqueta">APRENDE PARA TU VIDA</span>
+      <h2>Tu escuela de educación financiera</h2>
+      <p class="descripcion">
+        No necesitas ser experto en números. Aquí aprenderás con
+        ejemplos sencillos y herramientas que podrás utilizar en tu vida diaria.
+      </p>
+
+      <div class="beneficios">
+        <article class="beneficio">
+          <div class="icono-tarjeta">◎</div>
+          <h3>Conoce tus gastos</h3>
+          <p>Descubre en qué utilizas tu dinero y cuáles compras puedes controlar.</p>
+        </article>
+        <article class="beneficio">
+          <div class="icono-tarjeta">♧</div>
+          <h3>Aprende a ahorrar</h3>
+          <p>Define objetivos y avanza poco a poco hacia tus metas personales.</p>
+        </article>
+        <article class="beneficio">
+          <div class="icono-tarjeta">↗</div>
+          <h3>Planea tu futuro</h3>
+          <p>Conoce los conceptos básicos de las inversiones y sus riesgos.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- RETÍCULA ACADÉMICA -->
+    <section class="seccion reticula-seccion" id="reticula">
+      <div class="encabezado-seccion">
+        <div>
+          <span class="etiqueta">NUESTRA RUTA DE APRENDIZAJE</span>
+          <h2>Retícula académica</h2>
+          <p class="descripcion">
+            Avanza desde el control de tus gastos hasta tus primeras
+            decisiones financieras informadas.
+          </p>
+        </div>
+        <span class="contador-niveles">3 niveles</span>
+      </div>
+
+      <div class="reticula">
+        <article class="nivel nivel-activo">
+          <div class="nivel-arriba">
+            <span class="numero-nivel">01</span>
+            <span class="estado">Nivel inicial</span>
+          </div>
+          <div class="nivel-icono">▤</div>
+          <h3>Control de gastos</h3>
+          <p>Identifica los gastos hormiga y aprende a organizar tu dinero.</p>
+          <ul>
+            <li>Identificación de gastos hormiga</li>
+            <li>Necesidades y deseos</li>
+            <li>Presupuesto personal</li>
+          </ul>
+          <button class="boton boton-completo" data-leccion="1">Comenzar nivel →</button>
+        </article>
+
+        <article class="nivel">
+          <div class="nivel-arriba">
+            <span class="numero-nivel">02</span>
+            <span class="estado estado-pendiente">Siguiente nivel</span>
+          </div>
+          <div class="nivel-icono">♧</div>
+          <h3>Ahorro personal</h3>
+          <p>Organiza tus ingresos y establece objetivos que puedas alcanzar.</p>
+          <ul>
+            <li>Metas de ahorro</li>
+            <li>Presupuesto y planificación</li>
+            <li>Fondo de emergencia</li>
+          </ul>
+          <button class="boton boton-completo" data-leccion="2">Explorar nivel →</button>
+        </article>
+
+        <article class="nivel">
+          <div class="nivel-arriba">
+            <span class="numero-nivel">03</span>
+            <span class="estado estado-pendiente">Nivel avanzado</span>
+          </div>
+          <div class="nivel-icono">↗</div>
+          <h3>Introducción a inversiones</h3>
+          <p>Comprende cómo funcionan las inversiones antes de tomar decisiones.</p>
+          <ul>
+            <li>Ahorro e inversión</li>
+            <li>Rendimientos y riesgos</li>
+            <li>Interés compuesto</li>
+          </ul>
+          <button class="boton boton-completo" data-leccion="3">Explorar nivel →</button>
+        </article>
+      </div>
+
+      <div class="panel-leccion" id="panel-leccion" hidden>
+        <button id="cerrar-leccion" class="cerrar-panel" aria-label="Cerrar">✕</button>
+        <span class="etiqueta" id="leccion-etiqueta">UNIDAD 1</span>
+        <h3 id="leccion-titulo">Identifica tus gastos hormiga</h3>
+        <p id="leccion-descripcion"></p>
+        <div class="actividad">
+          <strong>Tu primera actividad</strong>
+          <p id="leccion-actividad"></p>
+          <button id="completar-leccion" class="boton">Marcar actividad como completada ✓</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GASTOS HORMIGA -->
+    <section class="seccion herramienta-seccion" id="gastos">
+      <div class="encabezado-seccion">
+        <div>
+          <span class="etiqueta">HERRAMIENTA FINANCIERA 01</span>
+          <h2>Mis gastos hormiga</h2>
+          <p class="descripcion">Registra tus compras en segundos y descubre cuánto gastas.</p>
+        </div>
+      </div>
+
+      <div class="panel-herramienta">
+        <div class="formulario-gastos">
+          <h3>Registrar un gasto</h3>
+          <p class="texto-secundario">¿Qué compraste hoy?</p>
+
+          <form id="form-gasto">
+            <label for="concepto">Concepto</label>
+            <input id="concepto" type="text" placeholder="Ej. Café, refresco, botana..." maxlength="80" required>
+
+            <label for="importe">¿Cuánto gastaste?</label>
+            <div class="campo-dinero">
+              <span>$</span>
+              <input id="importe" type="number" min="0.01" max="1000000" step="0.01" placeholder="0.00" required>
+            </div>
+
+            <label for="categoria">Categoría</label>
+            <select id="categoria">
+              <option value="Comida y bebidas">Comida y bebidas</option>
+              <option value="Antojos">Antojos</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Suscripciones">Suscripciones</option>
+              <option value="Otros">Otros</option>
+            </select>
+            <button type="submit" class="boton boton-completo">+ Registrar gasto</button>
+          </form>
+          <p class="nota">Registra tus compras. Tú decides qué gastos deseas reducir.</p>
+        </div>
+
+        <div class="resumen-gastos">
+          <h3>Resumen de mis gastos</h3>
+          <div class="resumen-cards">
+            <div class="resumen-card"><span>Hoy</span><strong id="total-hoy">$0.00</strong></div>
+            <div class="resumen-card"><span>Este mes</span><strong id="total-mes">$0.00</strong></div>
+            <div class="resumen-card"><span>Movimientos</span><strong id="cantidad-gastos">0</strong></div>
+          </div>
+
+          <div class="lista-encabezado">
+            <h3>Últimos movimientos</h3>
+            <button id="borrar-gastos" class="boton-texto">Borrar historial</button>
+          </div>
+          <div id="lista-gastos" class="lista-gastos">
+            <div class="vacio">
+              <span>▤</span>
+              <p>Aún no tienes gastos registrados.</p>
+              <small>Tu primer registro aparecerá aquí.</small>
+            </div>
+          </div>
+          <p id="mensaje-gasto" class="mensaje" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- AHORRO PERSONAL -->
+    <section class="seccion ahorro-seccion" id="ahorro">
+      <div class="encabezado-seccion">
+        <div>
+          <span class="etiqueta">HERRAMIENTA FINANCIERA 02</span>
+          <h2>Mi ahorro personal</h2>
+          <p class="descripcion">Establece una meta y sigue tu progreso.</p>
+        </div>
+      </div>
+
+      <div class="panel-ahorro">
+        <div class="formulario-ahorro">
+          <h3>Mi meta de ahorro</h3>
+          <form id="form-ahorro">
+            <label for="meta-nombre">¿Para qué quieres ahorrar?</label>
+            <input id="meta-nombre" type="text" placeholder="Ej. Comprar una computadora" maxlength="80" required>
+
+            <label for="meta-total">¿Cuánto quieres reunir?</label>
+            <div class="campo-dinero">
+              <span>$</span>
+              <input id="meta-total" type="number" min="0.01" max="100000000" step="0.01" placeholder="5000" required>
+            </div>
+
+            <label for="ahorro-actual">¿Cuánto tienes ahorrado?</label>
+            <div class="campo-dinero">
+              <span>$</span>
+              <input id="ahorro-actual" type="number" min="0" max="100000000" step="0.01" placeholder="0" required>
+            </div>
+            <button type="submit" class="boton boton-completo">Guardar mi meta</button>
+          </form>
+          <p id="mensaje-ahorro" class="mensaje" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="visual-ahorro">
+          <div class="ahorro-icono">♧</div>
+          <span class="texto-claro">MI OBJETIVO</span>
+          <h3 id="ahorro-nombre-vista">Tu próxima meta</h3>
+          <p class="texto-claro">Dinero que llevas ahorrado</p>
+          <strong class="cantidad-ahorro" id="ahorro-guardado">$0.00</strong>
+          <div class="barra-progreso barra-clara">
+            <div class="barra-relleno" id="barra-ahorro"></div>
+          </div>
+          <div class="progreso-detalle">
+            <span id="ahorro-porcentaje">0% completado</span>
+            <span id="ahorro-restante">$0.00 restantes</span>
+          </div>
+          <div class="consejo-ahorro">
+            <strong>Un consejo para ti</strong>
+            <p id="consejo-texto">Define una meta que se adapte a tus posibilidades y avanza a tu propio ritmo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENSAJE FINAL -->
+    <section class="llamado-final">
+      <span class="etiqueta">TU FUTURO, TUS DECISIONES</span>
+      <h2>Tu educación financiera comienza con un pequeño paso.</h2>
+      <p>Conoce tus hábitos, organiza tu dinero y aprende algo nuevo cada día.</p>
+      <a href="#reticula" class="boton boton-claro">Continuar aprendiendo →</a>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <a href="#inicio" class="logo">
+      <span class="logo-icono">F</span>
+      <span>Finanza<span class="texto-verde">Lab</span></span>
+    </a>
+    <p>Aprende hoy. Decide mejor mañana.</p>
+    <small>FinanzaLab · Proyecto educativo de educación financiera.</small>
+    <small>Los ejemplos son educativos y no constituyen asesoría financiera.</small>
+  </footer>
 
 </body>
 </html>
+
+

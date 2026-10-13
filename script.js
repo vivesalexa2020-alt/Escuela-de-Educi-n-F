@@ -1,349 +1,476 @@
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ELEMENTOS DEL MENÚ
+  const menuToggle = document.getElementById("menu-toggle");
+  const navegacion = document.getElementById("navegacion");
+  const barraLateral = document.querySelector(".barra-lateral");
 
-    // =========================
-    // MENÚ LATERAL
-    // =========================
+  // GUARDAR Y LEER DATOS DEL NAVEGADOR
+  function leerDatos(clave, inicial) {
+    try {
+      const datos = localStorage.getItem(clave);
+      return datos ? JSON.parse(datos) : inicial;
+    } catch {
+      return inicial;
+    }
+  }
 
-    const menuToggle = document.getElementById("menuToggle");
-    const barraLateral = document.getElementById("barraLateral");
-    const enlacesMenu = document.querySelectorAll(".enlace-menu");
+  function guardarDatos(clave, valor) {
+    try {
+      localStorage.setItem(clave, JSON.stringify(valor));
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
-    menuToggle.addEventListener("click", () => {
-        const abierto = barraLateral.classList.toggle("menu-abierto");
+  function formatoDinero(cantidad) {
+    return new Intl.NumberFormat("es-MX", {
+      style: "currency",
+      currency: "MXN"
+    }).format(cantidad);
+  }
 
-        menuToggle.setAttribute("aria-expanded", String(abierto));
-        menuToggle.setAttribute(
-            "aria-label",
-            abierto ? "Cerrar menú" : "Abrir menú"
-        );
-        menuToggle.textContent = abierto ? "✕" : "☰";
+  function fechaLocal() {
+    const fecha = new Date();
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    return `${anio}-${mes}-${dia}`;
+  }
+
+  let gastos = leerDatos("finanzalab_gastos", []);
+  let metaAhorro = leerDatos("finanzalab_meta", {
+    nombre: "",
+    objetivo: 0,
+    actual: 0
+  });
+  let leccionesCompletadas = leerDatos(
+    "finanzalab_lecciones",
+    []
+  );
+
+  if (!Array.isArray(gastos)) gastos = [];
+  if (!Array.isArray(leccionesCompletadas)) {
+    leccionesCompletadas = [];
+  }
+
+  // MENÚ LATERAL Y MENÚ PARA CELULAR
+  menuToggle.addEventListener("click", () => {
+    const abierto = barraLateral.classList.toggle("menu-abierto");
+
+    menuToggle.setAttribute("aria-expanded", String(abierto));
+    menuToggle.setAttribute(
+      "aria-label",
+      abierto ? "Cerrar menú" : "Abrir menú"
+    );
+    menuToggle.textContent = abierto ? "✕" : "☰";
+  });
+
+  navegacion.querySelectorAll("a").forEach(enlace => {
+    enlace.addEventListener("click", () => {
+      navegacion.querySelectorAll("a").forEach(item => {
+        item.classList.remove("activo");
+      });
+
+      enlace.classList.add("activo");
+      barraLateral.classList.remove("menu-abierto");
+      menuToggle.setAttribute("aria-expanded", "false");
+      menuToggle.setAttribute("aria-label", "Abrir menú");
+      menuToggle.textContent = "☰";
+    });
+  });
+
+  // PROGRESO GENERAL DE LA ESCUELA
+  function actualizarInicio() {
+    document.getElementById("hero-gastos").textContent =
+      String(gastos.length);
+
+    document.getElementById("hero-ahorro").textContent =
+      formatoDinero(Number(metaAhorro.actual) || 0);
+
+    const porcentaje = Math.round(
+      (leccionesCompletadas.length / 3) * 100
+    );
+
+    document.getElementById("progreso-general").style.width =
+      `${porcentaje}%`;
+
+    document.getElementById("progreso-texto").textContent =
+      `${porcentaje}%`;
+  }
+
+  // CONTENIDO DE LOS NIVELES
+  const lecciones = {
+    1: {
+      titulo: "Identifica tus gastos hormiga",
+      descripcion:
+        "Los gastos hormiga son pequeñas compras frecuentes que pueden acumular una cantidad importante de dinero. Aprende a reconocerlas sin dejar de cubrir tus necesidades.",
+      actividad:
+        "Anota tres compras pequeñas que hayas realizado recientemente. Regístralas en la herramienta de gastos y observa cuánto suman."
+    },
+    2: {
+      titulo: "Construye tu hábito de ahorro",
+      descripcion:
+        "Ahorrar consiste en reservar dinero para una meta futura. La cantidad debe adaptarse a tus posibilidades y a tus gastos esenciales.",
+      actividad:
+        "Crea una meta en la herramienta de ahorro. Escribe para qué quieres ahorrar y cuánto necesitas reunir."
+    },
+    3: {
+      titulo: "Conoce las inversiones",
+      descripcion:
+        "Invertir significa colocar dinero en una opción que puede generar rendimientos, pero también puede ocasionar pérdidas. Antes de decidir, conoce sus condiciones y riesgos.",
+      actividad:
+        "Escribe la diferencia entre ahorrar e invertir. Recuerda que ningún rendimiento está garantizado."
+    }
+  };
+
+  const panelLeccion = document.getElementById("panel-leccion");
+  const etiquetaLeccion = document.getElementById("leccion-etiqueta");
+  const tituloLeccion = document.getElementById("leccion-titulo");
+  const descripcionLeccion = document.getElementById(
+    "leccion-descripcion"
+  );
+  const actividadLeccion = document.getElementById("leccion-actividad");
+  const botonCompletar = document.getElementById("completar-leccion");
+
+  let leccionActual = null;
+
+  function actualizarBotonesLecciones() {
+    document.querySelectorAll("[data-leccion]").forEach(boton => {
+      const numero = Number(boton.dataset.leccion);
+      const completada = leccionesCompletadas.includes(numero);
+
+      if (completada) {
+        boton.textContent = "Actividad completada ✓";
+      } else if (numero === 1) {
+        boton.textContent = "Comenzar nivel →";
+      } else {
+        boton.textContent = "Explorar nivel →";
+      }
     });
 
-    enlacesMenu.forEach((enlace) => {
-        enlace.addEventListener("click", () => {
-            enlacesMenu.forEach((item) => item.classList.remove("activo"));
-            enlace.classList.add("activo");
+    actualizarInicio();
+  }
 
-            barraLateral.classList.remove("menu-abierto");
-            menuToggle.setAttribute("aria-expanded", "false");
-            menuToggle.setAttribute("aria-label", "Abrir menú");
-            menuToggle.textContent = "☰";
-        });
+  document.querySelectorAll("[data-leccion]").forEach(boton => {
+    boton.addEventListener("click", () => {
+      leccionActual = Number(boton.dataset.leccion);
+      const leccion = lecciones[leccionActual];
+
+      etiquetaLeccion.textContent = `NIVEL ${leccionActual}`;
+      tituloLeccion.textContent = leccion.titulo;
+      descripcionLeccion.textContent = leccion.descripcion;
+      actividadLeccion.textContent = leccion.actividad;
+
+      botonCompletar.textContent =
+        leccionesCompletadas.includes(leccionActual)
+          ? "Actividad completada ✓"
+          : "Marcar actividad como completada ✓";
+
+      panelLeccion.hidden = false;
+      panelLeccion.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
     });
+  });
 
-    // Cambiar el enlace activo según la sección visible.
-    const secciones = document.querySelectorAll("main section[id]");
+  document.getElementById("cerrar-leccion").addEventListener(
+    "click",
+    () => {
+      panelLeccion.hidden = true;
+    }
+  );
 
-    if ("IntersectionObserver" in window) {
-        const observador = new IntersectionObserver((entradas) => {
-            entradas.forEach((entrada) => {
-                if (entrada.isIntersecting) {
-                    enlacesMenu.forEach((enlace) => {
-                        enlace.classList.toggle(
-                            "activo",
-                            enlace.getAttribute("href") === "#" + entrada.target.id
-                        );
-                    });
-                }
-            });
-        }, {
-            rootMargin: "-25% 0px -60% 0px"
-        });
+  botonCompletar.addEventListener("click", () => {
+    if (leccionActual === null) return;
 
-        secciones.forEach((seccion) => observador.observe(seccion));
+    if (!leccionesCompletadas.includes(leccionActual)) {
+      leccionesCompletadas.push(leccionActual);
+      leccionesCompletadas.sort((a, b) => a - b);
+
+      if (!guardarDatos(
+        "finanzalab_lecciones",
+        leccionesCompletadas
+      )) {
+        leccionesCompletadas =
+          leccionesCompletadas.filter(n => n !== leccionActual);
+
+        alert("No se pudo guardar el progreso en este navegador.");
+        return;
+      }
     }
 
-    // =========================
-    // CALCULADORA DE AHORRO
-    // =========================
+    actualizarBotonesLecciones();
+    botonCompletar.textContent = "Actividad completada ✓";
+  });
 
-    const cantidad = document.getElementById("cantidad");
-    const meses = document.getElementById("meses");
-    const botonCalcular = document.getElementById("calcular");
-    const resultado = document.getElementById("resultado");
-    const detalleResultado = document.getElementById("detalleResultado");
+  // REGISTRO DE GASTOS HORMIGA
+  const formularioGasto = document.getElementById("form-gasto");
+  const campoConcepto = document.getElementById("concepto");
+  const campoImporte = document.getElementById("importe");
+  const campoCategoria = document.getElementById("categoria");
+  const listaGastos = document.getElementById("lista-gastos");
+  const mensajeGasto = document.getElementById("mensaje-gasto");
 
-    const formatoDinero = new Intl.NumberFormat("es-MX", {
-        style: "currency",
-        currency: "MXN",
-        maximumFractionDigits: 2
-    });
+  formularioGasto.addEventListener("submit", evento => {
+    evento.preventDefault();
 
-    function calcularAhorro() {
-        const ahorroMensual = Number(cantidad.value);
-        const numeroMeses = Number(meses.value);
+    const concepto = campoConcepto.value.trim();
+    const importe = Number(campoImporte.value);
 
-        if (
-            cantidad.value.trim() === "" ||
-            !Number.isFinite(ahorroMensual) ||
-            ahorroMensual < 0
-        ) {
-            resultado.textContent = "Cantidad no válida";
-            detalleResultado.textContent =
-                "Escribe una cantidad igual o mayor que cero.";
-            return;
-        }
-
-        const total = ahorroMensual * numeroMeses;
-
-        resultado.textContent = formatoDinero.format(total);
-        detalleResultado.textContent =
-            `Ahorrando ${formatoDinero.format(ahorroMensual)} al mes durante ${numeroMeses} meses, sin considerar intereses.`;
+    if (
+      !concepto ||
+      !Number.isFinite(importe) ||
+      importe <= 0 ||
+      importe > 1000000
+    ) {
+      mensajeGasto.textContent =
+        "Escribe un concepto y una cantidad válida.";
+      return;
     }
 
-    botonCalcular.addEventListener("click", calcularAhorro);
-    cantidad.addEventListener("input", calcularAhorro);
-    meses.addEventListener("change", calcularAhorro);
-
-    calcularAhorro();
-
-    // =========================
-    // MINI LECCIONES
-    // =========================
-
-    const cursos = {
-        ahorro: {
-            titulo: "El arte del ahorro",
-            texto: "Ahorrar consiste en guardar una parte del dinero que recibes para utilizarlo más adelante. No necesitas empezar con mucho: lo importante es crear el hábito.",
-            actividad: "Ejemplo: si guardas $50 cada semana, al terminar 4 semanas tendrás $200."
-        },
-        presupuesto: {
-            titulo: "Tu primer presupuesto",
-            texto: "Un presupuesto te ayuda a saber cuánto dinero recibes, cuánto gastas y cuánto puedes ahorrar. Anotar tus gastos permite identificar en qué puedes mejorar.",
-            actividad: "Actividad: anota tus ingresos y después escribe tres gastos que tengas durante la semana."
-        },
-        metas: {
-            titulo: "Metas financieras",
-            texto: "Una meta financiera es algo para lo que quieres reunir dinero, como comprar una computadora o pagar un curso. Define cuánto necesitas y cuánto puedes guardar cada mes.",
-            actividad: "Ejemplo: si necesitas $1,200 y puedes ahorrar $200 al mes, tardarás 6 meses en reunir esa cantidad."
-        }
+    const nuevoGasto = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      concepto,
+      importe,
+      categoria: campoCategoria.value,
+      fecha: fechaLocal()
     };
 
-    const modalCurso = document.getElementById("modalCurso");
-    const tituloModal = document.getElementById("tituloModal");
-    const textoModal = document.getElementById("textoModal");
-    const actividadModal = document.getElementById("actividadModal");
-    const cerrarModal = document.getElementById("cerrarModal");
-    const terminarLeccion = document.getElementById("terminarLeccion");
-    const botonesCurso = document.querySelectorAll("[data-curso]");
+    gastos.unshift(nuevoGasto);
 
-    function abrirLeccion(tipo) {
-        const curso = cursos[tipo];
-
-        if (!curso) return;
-
-        tituloModal.textContent = curso.titulo;
-        textoModal.textContent = curso.texto;
-        actividadModal.textContent = curso.actividad;
-
-        modalCurso.classList.add("modal-visible");
-        modalCurso.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-
-        cerrarModal.focus();
+    if (!guardarDatos("finanzalab_gastos", gastos)) {
+      gastos.shift();
+      mensajeGasto.textContent =
+        "No se pudo guardar el gasto en este navegador.";
+      return;
     }
 
-    function cerrarLeccion() {
-        modalCurso.classList.remove("modal-visible");
-        modalCurso.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
+    formularioGasto.reset();
+    mensajeGasto.textContent = "¡Gasto registrado correctamente!";
+    actualizarGastos();
+    actualizarInicio();
+  });
+
+  function actualizarGastos() {
+    const hoy = fechaLocal();
+    const mesActual = hoy.slice(0, 7);
+
+    const totalHoy = gastos
+      .filter(gasto => gasto.fecha === hoy)
+      .reduce((suma, gasto) => suma + gasto.importe, 0);
+
+    const totalMes = gastos
+      .filter(gasto => gasto.fecha.startsWith(mesActual))
+      .reduce((suma, gasto) => suma + gasto.importe, 0);
+
+    document.getElementById("total-hoy").textContent =
+      formatoDinero(totalHoy);
+
+    document.getElementById("total-mes").textContent =
+      formatoDinero(totalMes);
+
+    document.getElementById("cantidad-gastos").textContent =
+      String(gastos.length);
+
+    listaGastos.replaceChildren();
+
+    if (gastos.length === 0) {
+      const vacio = document.createElement("div");
+      vacio.className = "vacio";
+
+      const icono = document.createElement("span");
+      icono.textContent = "▤";
+
+      const texto = document.createElement("p");
+      texto.textContent = "Aún no tienes gastos registrados.";
+
+      const detalle = document.createElement("small");
+      detalle.textContent = "Tu primer registro aparecerá aquí.";
+
+      vacio.append(icono, texto, detalle);
+      listaGastos.appendChild(vacio);
+      return;
     }
 
-    botonesCurso.forEach((boton) => {
-        boton.addEventListener("click", () => {
-            abrirLeccion(boton.dataset.curso);
-        });
-    });
+    gastos.slice(0, 10).forEach(gasto => {
+      const fila = document.createElement("div");
+      fila.className = "gasto-item";
 
-    cerrarModal.addEventListener("click", cerrarLeccion);
-    terminarLeccion.addEventListener("click", cerrarLeccion);
+      const icono = document.createElement("div");
+      icono.className = "gasto-icono";
+      icono.textContent = "↗";
 
-    modalCurso.addEventListener("click", (evento) => {
-        if (evento.target === modalCurso) {
-            cerrarLeccion();
+      const detalle = document.createElement("div");
+      detalle.className = "gasto-detalle";
+
+      const concepto = document.createElement("strong");
+      concepto.textContent = gasto.concepto;
+
+      const informacion = document.createElement("span");
+      informacion.textContent =
+        `${gasto.categoria} · ${gasto.fecha}`;
+
+      detalle.append(concepto, informacion);
+
+      const cantidad = document.createElement("span");
+      cantidad.className = "gasto-cantidad";
+      cantidad.textContent = formatoDinero(gasto.importe);
+
+      const eliminar = document.createElement("button");
+      eliminar.type = "button";
+      eliminar.className = "gasto-eliminar";
+      eliminar.textContent = "✕";
+      eliminar.setAttribute(
+        "aria-label",
+        `Eliminar gasto ${gasto.concepto}`
+      );
+
+      eliminar.addEventListener("click", () => {
+        const gastosAnteriores = gastos;
+
+        gastos = gastos.filter(item => item.id !== gasto.id);
+
+        if (!guardarDatos("finanzalab_gastos", gastos)) {
+          gastos = gastosAnteriores;
+          mensajeGasto.textContent =
+            "No se pudo eliminar el gasto.";
+          return;
         }
+
+        mensajeGasto.textContent = "Gasto eliminado.";
+        actualizarGastos();
+        actualizarInicio();
+      });
+
+      fila.append(icono, detalle, cantidad, eliminar);
+      listaGastos.appendChild(fila);
     });
+  }
 
-    document.addEventListener("keydown", (evento) => {
-        if (evento.key === "Escape" &&
-            modalCurso.classList.contains("modal-visible")) {
-            cerrarLeccion();
-        }
-    });
+  // BORRAR HISTORIAL DE GASTOS
+  document.getElementById("borrar-gastos").addEventListener(
+    "click",
+    () => {
+      if (gastos.length === 0) {
+        mensajeGasto.textContent = "No hay gastos que borrar.";
+        return;
+      }
 
-    // =========================
-    // CUESTIONARIO FINANCIERO
-    // =========================
+      const confirmar = confirm(
+        "¿Quieres borrar todo tu historial de gastos? Esta acción no se puede deshacer."
+      );
 
-    const preguntas = [
-        {
-            pregunta: "¿Qué significa ahorrar?",
-            opciones: [
-                "Gastar todo el dinero que recibimos",
-                "Guardar una parte del dinero para usarla después",
-                "Pedir dinero prestado constantemente"
-            ],
-            correcta: 1,
-            explicacion: "¡Correcto! Ahorrar es guardar dinero para necesidades o metas futuras."
-        },
-        {
-            pregunta: "¿Para qué sirve un presupuesto?",
-            opciones: [
-                "Para gastar sin llevar cuentas",
-                "Para comprar cosas innecesarias",
-                "Para organizar los ingresos y los gastos"
-            ],
-            correcta: 2,
-            explicacion: "¡Muy bien! Un presupuesto ayuda a controlar el dinero y planear los gastos."
-        },
-        {
-            pregunta: "¿Qué es una meta financiera?",
-            opciones: [
-                "Un objetivo relacionado con el dinero",
-                "Gastar todo el sueldo el primer día",
-                "No revisar nunca nuestros gastos"
-            ],
-            correcta: 0,
-            explicacion: "¡Exacto! Una meta financiera es un objetivo económico que queremos alcanzar."
-        }
-    ];
+      if (!confirmar) return;
 
-    const numeroPregunta = document.getElementById("numeroPregunta");
-    const puntuacion = document.getElementById("puntuacion");
-    const progresoRelleno = document.getElementById("progresoRelleno");
-    const preguntaTexto = document.getElementById("pregunta");
-    const opcionesQuiz = document.getElementById("opcionesQuiz");
-    const mensajeQuiz = document.getElementById("mensajeQuiz");
-    const siguientePregunta = document.getElementById("siguientePregunta");
-    const resultadoQuiz = document.getElementById("resultadoQuiz");
-    const reiniciarQuiz = document.getElementById("reiniciarQuiz");
+      const anteriores = gastos;
+      gastos = [];
 
-    let indicePregunta = 0;
-    let puntos = 0;
-    let respondida = false;
+      if (!guardarDatos("finanzalab_gastos", gastos)) {
+        gastos = anteriores;
+        mensajeGasto.textContent =
+          "No se pudo borrar el historial.";
+        return;
+      }
 
-    function mostrarPregunta() {
-        const preguntaActual = preguntas[indicePregunta];
+      mensajeGasto.textContent = "Historial eliminado.";
+      actualizarGastos();
+      actualizarInicio();
+    }
+  );
 
-        respondida = false;
-        numeroPregunta.textContent =
-            `Pregunta ${indicePregunta + 1} de ${preguntas.length}`;
-        puntuacion.textContent = `Puntos: ${puntos}`;
-        progresoRelleno.style.width =
-            `${((indicePregunta + 1) / preguntas.length) * 100}%`;
+  // META DE AHORRO PERSONAL
+  const formularioAhorro = document.getElementById("form-ahorro");
+  const campoMetaNombre = document.getElementById("meta-nombre");
+  const campoMetaTotal = document.getElementById("meta-total");
+  const campoAhorroActual = document.getElementById("ahorro-actual");
+  const mensajeAhorro = document.getElementById("mensaje-ahorro");
 
-        preguntaTexto.textContent = preguntaActual.pregunta;
-        mensajeQuiz.textContent = "";
-        opcionesQuiz.replaceChildren();
+  function actualizarAhorro() {
+    const objetivo = Number(metaAhorro.objetivo) || 0;
+    const actual = Number(metaAhorro.actual) || 0;
+    const restante = Math.max(objetivo - actual, 0);
 
-        siguientePregunta.disabled = true;
-        siguientePregunta.hidden = false;
-        resultadoQuiz.hidden = true;
-        reiniciarQuiz.hidden = true;
+    const porcentaje = objetivo > 0
+      ? Math.min((actual / objetivo) * 100, 100)
+      : 0;
 
-        preguntaActual.opciones.forEach((opcion, indice) => {
-            const boton = document.createElement("button");
+    document.getElementById("ahorro-nombre-vista").textContent =
+      metaAhorro.nombre || "Tu próxima meta";
 
-            boton.type = "button";
-            boton.className = "opcion-quiz";
-            boton.textContent = opcion;
+    document.getElementById("ahorro-guardado").textContent =
+      formatoDinero(actual);
 
-            boton.addEventListener("click", () => {
-                responderPregunta(indice, boton);
-            });
+    document.getElementById("barra-ahorro").style.width =
+      `${porcentaje}%`;
 
-            opcionesQuiz.appendChild(boton);
-        });
+    document.getElementById("ahorro-porcentaje").textContent =
+      `${Math.round(porcentaje)}% completado`;
 
-        siguientePregunta.textContent =
-            indicePregunta === preguntas.length - 1
-                ? "Ver resultado →"
-                : "Siguiente pregunta →";
+    document.getElementById("ahorro-restante").textContent =
+      objetivo > 0 && actual >= objetivo
+        ? "¡Meta alcanzada!"
+        : `${formatoDinero(restante)} restantes`;
+
+    const consejo = document.getElementById("consejo-texto");
+
+    if (objetivo > 0 && actual >= objetivo) {
+      consejo.textContent =
+        "¡Felicidades! Has alcanzado tu meta de ahorro. Puedes definir una nueva.";
+    } else if (actual > 0) {
+      consejo.textContent =
+        "Vas avanzando. Revisa tu progreso y procura reservar una cantidad que se ajuste a tus posibilidades.";
+    } else {
+      consejo.textContent =
+        "Define una meta que se adapte a tus posibilidades y avanza a tu propio ritmo.";
     }
 
-    function responderPregunta(indiceElegido, botonElegido) {
-        if (respondida) return;
+    campoMetaNombre.value = metaAhorro.nombre || "";
+    campoMetaTotal.value = objetivo || "";
+    campoAhorroActual.value = actual || "";
+  }
 
-        respondida = true;
+  formularioAhorro.addEventListener("submit", evento => {
+    evento.preventDefault();
 
-        const preguntaActual = preguntas[indicePregunta];
-        const botones = opcionesQuiz.querySelectorAll(".opcion-quiz");
-        const esCorrecta = indiceElegido === preguntaActual.correcta;
+    const nombre = campoMetaNombre.value.trim();
+    const objetivo = Number(campoMetaTotal.value);
+    const actual = Number(campoAhorroActual.value);
 
-        botones.forEach((boton, indice) => {
-            boton.disabled = true;
-
-            if (indice === preguntaActual.correcta) {
-                boton.classList.add("correcta");
-            }
-        });
-
-        if (esCorrecta) {
-            puntos++;
-            mensajeQuiz.textContent = preguntaActual.explicacion;
-        } else {
-            botonElegido.classList.add("incorrecta");
-            mensajeQuiz.textContent =
-                "No pasa nada. " + preguntaActual.explicacion;
-        }
-
-        puntuacion.textContent = `Puntos: ${puntos}`;
-        siguientePregunta.disabled = false;
+    if (
+      !nombre ||
+      !Number.isFinite(objetivo) ||
+      !Number.isFinite(actual) ||
+      objetivo <= 0 ||
+      actual < 0 ||
+      objetivo > 100000000 ||
+      actual > 100000000
+    ) {
+      mensajeAhorro.textContent =
+        "Revisa el nombre y las cantidades de tu meta.";
+      return;
     }
 
-    function finalizarQuiz() {
-        preguntaTexto.textContent = "¡Cuestionario terminado!";
-        opcionesQuiz.replaceChildren();
-        mensajeQuiz.textContent = "";
+    metaAhorro = { nombre, objetivo, actual };
 
-        const porcentaje = Math.round((puntos / preguntas.length) * 100);
-
-        let mensajeFinal;
-
-        if (puntos === preguntas.length) {
-            mensajeFinal = "¡Excelente! Dominas estos conceptos básicos.";
-        } else if (puntos >= 2) {
-            mensajeFinal = "¡Muy bien! Sigue practicando para aprender más.";
-        } else {
-            mensajeFinal = "¡Sigue aprendiendo! Puedes repasar los cursos y volver a intentarlo.";
-        }
-
-        resultadoQuiz.replaceChildren();
-
-        const tituloResultado = document.createElement("strong");
-        tituloResultado.textContent = `${puntos} de ${preguntas.length} respuestas correctas`;
-
-        const textoResultado = document.createElement("p");
-        textoResultado.textContent = `${porcentaje}% de aciertos. ${mensajeFinal}`;
-
-        resultadoQuiz.append(tituloResultado, textoResultado);
-        resultadoQuiz.hidden = false;
-
-        siguientePregunta.hidden = true;
-        reiniciarQuiz.hidden = false;
-        progresoRelleno.style.width = "100%";
-        numeroPregunta.textContent = "Cuestionario completado";
+    if (!guardarDatos("finanzalab_meta", metaAhorro)) {
+      mensajeAhorro.textContent =
+        "No se pudo guardar tu meta en este navegador.";
+      return;
     }
 
-    siguientePregunta.addEventListener("click", () => {
-        if (!respondida) return;
+    mensajeAhorro.textContent = "¡Tu meta de ahorro está guardada!";
+    actualizarAhorro();
+    actualizarInicio();
+  });
 
-        if (indicePregunta < preguntas.length - 1) {
-            indicePregunta++;
-            mostrarPregunta();
-        } else {
-            finalizarQuiz();
-        }
-    });
-
-    reiniciarQuiz.addEventListener("click", () => {
-        indicePregunta = 0;
-        puntos = 0;
-        mostrarPregunta();
-    });
-
-    mostrarPregunta();
-
+  // CARGAR INFORMACIÓN AL ABRIR LA PÁGINA
+  actualizarGastos();
+  actualizarAhorro();
+  actualizarBotonesLecciones();
+  actualizarInicio();
 });
+
 
