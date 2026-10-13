@@ -115,44 +115,58 @@ $payload = [
 ];
 
 $apiKey = trim(GEMINI_API_KEY);
-$endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . urlencode($apiKey);
-
 $payloadJson = json_encode($payload);
+
+// Cadena de modelos de respaldo: si uno está saturado (503/429) o falla,
+// se intenta con el siguiente. El primero es el más estable y económico.
+$modelos = [
+    'gemini-flash-lite-latest',
+    'gemini-flash-latest',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite'
+];
+
 $responseData = null;
 $httpCode = 0;
 $curlError = '';
 
-// Reintento automático en caso de congestión temporal (503 / 429)
-for ($intento = 1; $intento <= 2; $intento++) {
-    $ch = curl_init($endpoint);
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json'
-        ],
-        CURLOPT_POSTFIELDS => $payloadJson,
-        CURLOPT_TIMEOUT => 25,
-        CURLOPT_SSL_VERIFYPEER => false
-    ]);
+foreach ($modelos as $modelo) {
+    $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/"
+        . $modelo . ":generateContent?key=" . urlencode($apiKey);
 
-    $responseRaw = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlError = curl_error($ch);
-    curl_close($ch);
+    // Reintento automático en caso de congestión temporal (503 / 429)
+    for ($intento = 1; $intento <= 2; $intento++) {
+        $ch = curl_init($endpoint);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json'
+            ],
+            CURLOPT_POSTFIELDS => $payloadJson,
+            CURLOPT_TIMEOUT => 25,
+            CURLOPT_SSL_VERIFYPEER => false
+        ]);
 
-    if ($responseRaw !== false) {
-        $responseData = json_decode($responseRaw, true);
-        if ($httpCode === 200 && !empty($responseData['candidates'])) {
-            break;
+        $responseRaw = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        if ($responseRaw !== false) {
+            $responseData = json_decode($responseRaw, true);
+            if ($httpCode === 200 && !empty($responseData['candidates'])) {
+                break 2; // Éxito: salir de ambos bucles
+            }
+        }
+
+        if ($httpCode === 503 || $httpCode === 429) {
+            usleep(1200000); // Esperar 1.2 segundos antes de reintentar el mismo modelo
+        } else {
+            break; // Error no recuperable en este modelo: pasar al siguiente
         }
     }
-
-    if ($httpCode === 503 || $httpCode === 429) {
-        usleep(1200000); // Esperar 1.2 segundos antes de reintentar
-    } else {
-        break;
-    }
+    // Si el modelo agotó sus intentos sin éxito, se continúa con el siguiente de la lista
 }
 
 if ($responseData === null && !empty($curlError)) {
