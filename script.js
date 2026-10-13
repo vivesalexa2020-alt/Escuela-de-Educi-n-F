@@ -670,6 +670,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalAuthTabs = document.getElementById("modal-auth-tabs");
   const formRegistro = document.getElementById("form-registro");
   const formLogin = document.getElementById("form-login");
+  const formRecuperar = document.getElementById("form-recuperar");
+  const btnAbrirRecuperar = document.getElementById("btn-abrir-recuperar");
+  const btnVolverLogin = document.getElementById("btn-volver-login");
   const authMensaje = document.getElementById("auth-mensaje");
   const authPerfilActivo = document.getElementById("auth-perfil-activo");
   const btnCerrarSesion = document.getElementById("btn-cerrar-sesion");
@@ -689,16 +692,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function cambiarPestanaAuth(pestana) {
     mostrarMensajeAuth("");
-    if (pestana === "registro") {
+    if (pestana === "recuperar") {
+      modalAuthTabs?.setAttribute("hidden", "true");
+      formRegistro?.setAttribute("hidden", "true");
+      formLogin?.setAttribute("hidden", "true");
+      formRecuperar?.removeAttribute("hidden");
+    } else if (pestana === "registro") {
+      modalAuthTabs?.removeAttribute("hidden");
       tabRegistro?.classList.add("activo");
       tabLogin?.classList.remove("activo");
       formRegistro?.removeAttribute("hidden");
       formLogin?.setAttribute("hidden", "true");
+      formRecuperar?.setAttribute("hidden", "true");
     } else {
+      modalAuthTabs?.removeAttribute("hidden");
       tabLogin?.classList.add("activo");
       tabRegistro?.classList.remove("activo");
       formLogin?.removeAttribute("hidden");
       formRegistro?.setAttribute("hidden", "true");
+      formRecuperar?.setAttribute("hidden", "true");
     }
   }
 
@@ -817,6 +829,44 @@ document.addEventListener("DOMContentLoaded", () => {
       actualizarUIUsuario(null);
     }
   });
+
+  // RECUPERAR CONTRASEÑA
+  const formRecuperarEl = document.getElementById("form-recuperar");
+  formRecuperarEl?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = document.getElementById("rec-email")?.value.trim();
+    const password = document.getElementById("rec-password")?.value;
+
+    mostrarMensajeAuth("Actualizando tu contraseña...", "");
+
+    try {
+      const resp = await fetch("api/auth.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "recuperar", email, password })
+      });
+      const data = await resp.json();
+
+      if (data.ok) {
+        mostrarMensajeAuth(data.mensaje, "exito");
+        // Limpiar los campos de recuperación
+        document.getElementById("rec-email").value = "";
+        document.getElementById("rec-password").value = "";
+        // Regresar al login después de 2 segundos
+        setTimeout(() => {
+          cambiarPestanaAuth("login");
+          mostrarMensajeAuth("Ya puedes iniciar sesión con tu nueva contraseña.", "exito");
+        }, 2000);
+      } else {
+        mostrarMensajeAuth(data.error || "No se pudo restablecer la contraseña.", "error");
+      }
+    } catch {
+      mostrarMensajeAuth("Error de conexión. Intenta nuevamente.", "error");
+    }
+  });
+
+  btnAbrirRecuperar?.addEventListener("click", () => cambiarPestanaAuth("recuperar"));
+  btnVolverLogin?.addEventListener("click", () => cambiarPestanaAuth("login"));
 
   btnAbrirAuth?.addEventListener("click", abrirModalAuth);
   enlaceMenuCuenta?.addEventListener("click", e => {

@@ -107,6 +107,44 @@ switch ($action) {
         ], JSON_UNESCAPED_UNICODE);
         break;
 
+    case 'recuperar':
+        $email = trim($data['email'] ?? '');
+        $nuevaPassword = $data['password'] ?? '';
+
+        if (empty($email) || empty($nuevaPassword)) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'Por favor ingresa tu correo y la nueva contraseña.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        if (strlen($nuevaPassword) < 6) {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'La nueva contraseña debe tener al menos 6 caracteres.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Verificar que el correo exista en la base de datos
+        $stmt = $pdo->prepare('SELECT id, nombre FROM usuarios WHERE email = ?');
+        $stmt->execute([$email]);
+        $usuario = $stmt->fetch();
+
+        if (!$usuario) {
+            http_response_code(404);
+            echo json_encode(['ok' => false, 'error' => 'No encontramos ninguna cuenta registrada con este correo electrónico.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        // Cifrar la nueva contraseña y actualizar
+        $passwordHash = password_hash($nuevaPassword, PASSWORD_BCRYPT);
+        $update = $pdo->prepare('UPDATE usuarios SET password = ? WHERE id = ?');
+        $update->execute([$passwordHash, $usuario['id']]);
+
+        echo json_encode([
+            'ok' => true,
+            'mensaje' => '¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva contraseña.'
+        ], JSON_UNESCAPED_UNICODE);
+        break;
+
     case 'check':
         if (!empty($_SESSION['usuario'])) {
             echo json_encode([

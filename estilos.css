@@ -1683,6 +1683,43 @@ form .boton {
   border-color: var(--verde);
 }
 
+.auth-enlace-recuperar {
+  margin: 6px 0 10px;
+  text-align: right;
+}
+
+.auth-enlace-recuperar.text-center {
+  text-align: center;
+  margin-top: 14px;
+}
+
+.btn-link-auth {
+  background: transparent;
+  border: none;
+  color: var(--verde);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.btn-link-auth:hover {
+  color: var(--turquesa);
+}
+
+.auth-instruccion {
+  font-size: 13px;
+  color: var(--texto-suave);
+  line-height: 1.45;
+  margin-bottom: 12px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+}
+
 .form-auth button[type="submit"] {
   margin-top: 16px;
 }
