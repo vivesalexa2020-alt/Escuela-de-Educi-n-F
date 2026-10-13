@@ -466,6 +466,198 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarInicio();
   });
 
+  // ========================================================
+  // ASISTENTE INTELIGENTE: FINANBOT
+  // ========================================================
+  const chatToggleBtn = document.getElementById("chat-toggle-btn");
+  const chatVentana = document.getElementById("chat-ventana");
+  const chatBtnCerrar = document.getElementById("chat-btn-cerrar");
+  const chatMensajes = document.getElementById("chat-mensajes");
+  const chatFormulario = document.getElementById("chat-formulario");
+  const chatInput = document.getElementById("chat-input");
+
+  const chatIconoAbrir = chatToggleBtn?.querySelector(".chat-icono-abrir");
+  const chatIconoCerrar = chatToggleBtn?.querySelector(".chat-icono-cerrar");
+
+  let historialChat = [];
+  let estaRespondiendo = false;
+
+  function alternarChat(forzarEstado) {
+    if (!chatVentana) return;
+    const abrir = typeof forzarEstado === "boolean" 
+      ? forzarEstado 
+      : !chatVentana.classList.contains("abierto");
+
+    chatVentana.classList.toggle("abierto", abrir);
+    chatVentana.setAttribute("aria-hidden", String(!abrir));
+    chatToggleBtn?.setAttribute("aria-expanded", String(abrir));
+
+    if (chatIconoAbrir && chatIconoCerrar) {
+      chatIconoAbrir.hidden = abrir;
+      chatIconoCerrar.hidden = !abrir;
+    }
+
+    if (abrir) {
+      setTimeout(() => chatInput?.focus(), 150);
+      scrollChatAbajo();
+    }
+  }
+
+  function scrollChatAbajo() {
+    if (!chatMensajes) return;
+    chatMensajes.scrollTop = chatMensajes.scrollHeight;
+  }
+
+  function escaparHTML(texto) {
+    const div = document.createElement("div");
+    div.textContent = texto;
+    return div.innerHTML;
+  }
+
+  function formatearMarkdown(texto) {
+    let limpio = escaparHTML(texto);
+
+    // Negritas: **texto**
+    limpio = limpio.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+    // Listas con guión
+    const lineas = limpio.split("\n");
+    let enLista = false;
+    let resultado = "";
+
+    for (const linea of lineas) {
+      const lineaTrim = linea.trim();
+      if (lineaTrim.startsWith("- ") || lineaTrim.startsWith("* ")) {
+        if (!enLista) {
+          resultado += "<ul>";
+          enLista = true;
+        }
+        resultado += `<li>${lineaTrim.slice(2)}</li>`;
+      } else {
+        if (enLista) {
+          resultado += "</ul>";
+          enLista = false;
+        }
+        if (lineaTrim) {
+          resultado += `<p>${lineaTrim}</p>`;
+        }
+      }
+    }
+
+    if (enLista) resultado += "</ul>";
+    return resultado || `<p>${limpio}</p>`;
+  }
+
+  function agregarMensaje(texto, tipo = "bot") {
+    if (!chatMensajes) return;
+
+    const mensajeDiv = document.createElement("div");
+    mensajeDiv.className = `mensaje-chat mensaje-${tipo}`;
+
+    const contenidoDiv = document.createElement("div");
+    contenidoDiv.className = "mensaje-contenido";
+
+    if (tipo === "bot") {
+      contenidoDiv.innerHTML = formatearMarkdown(texto);
+    } else {
+      const p = document.createElement("p");
+      p.textContent = texto;
+      contenidoDiv.appendChild(p);
+    }
+
+    mensajeDiv.appendChild(contenidoDiv);
+    chatMensajes.appendChild(mensajeDiv);
+    scrollChatAbajo();
+  }
+
+  function mostrarEscribiendo() {
+    quitarEscribiendo();
+    const escribiendo = document.createElement("div");
+    escribiendo.className = "chat-escribiendo";
+    escribiendo.id = "chat-escribiendo-indicador";
+    escribiendo.innerHTML = "<span></span><span></span><span></span>";
+    chatMensajes?.appendChild(escribiendo);
+    scrollChatAbajo();
+  }
+
+  function quitarEscribiendo() {
+    const elem = document.getElementById("chat-escribiendo-indicador");
+    if (elem) elem.remove();
+  }
+
+  async function enviarPregunta(texto) {
+    const mensaje = texto.trim();
+    if (!mensaje || estaRespondiendo) return;
+
+    estaRespondiendo = true;
+    agregarMensaje(mensaje, "usuario");
+
+    if (chatInput) {
+      chatInput.value = "";
+      chatInput.disabled = true;
+    }
+
+    mostrarEscribiendo();
+
+    try {
+      const respuesta = await fetch("api/chat.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: mensaje,
+          history: historialChat
+        })
+      });
+
+      const data = await respuesta.json();
+      quitarEscribiendo();
+
+      if (data.ok && data.reply) {
+        agregarMensaje(data.reply, "bot");
+        historialChat.push({ role: "user", text: mensaje });
+        historialChat.push({ role: "model", text: data.reply });
+      } else if (data.needs_key) {
+        agregarMensaje(
+          "⚙️ **Casi listo para comenzar:**\nPara activar a FinanBot, por favor abre el archivo `api/config.php` en Visual Studio Code y pega tu clave API de Google Gemini.",
+          "bot"
+        );
+      } else {
+        agregarMensaje(
+          `⚠️ ${data.error || "Ocurrió un problema al procesar la respuesta. Intenta nuevamente."}`,
+          "bot"
+        );
+      }
+    } catch (error) {
+      quitarEscribiendo();
+      agregarMensaje(
+        "⚠️ No se pudo conectar con el servidor local. Asegúrate de tener Apache encendido en XAMPP y acceder mediante http://localhost/FinanzaLab/.",
+        "bot"
+      );
+    } finally {
+      estaRespondiendo = false;
+      if (chatInput) {
+        chatInput.disabled = false;
+        chatInput.focus();
+      }
+    }
+  }
+
+  chatToggleBtn?.addEventListener("click", () => alternarChat());
+  chatBtnCerrar?.addEventListener("click", () => alternarChat(false));
+
+  chatFormulario?.addEventListener("submit", evento => {
+    evento.preventDefault();
+    if (chatInput) enviarPregunta(chatInput.value);
+  });
+
+  // Manejo de chips con preguntas sugeridas
+  chatMensajes?.addEventListener("click", evento => {
+    const chip = evento.target.closest(".chip-sugerencia");
+    if (chip && chip.dataset.pregunta) {
+      enviarPregunta(chip.dataset.pregunta);
+    }
+  });
+
   // CARGAR INFORMACIÓN AL ABRIR LA PÁGINA
   actualizarGastos();
   actualizarAhorro();
