@@ -115,26 +115,47 @@ $payload = [
 ];
 
 $apiKey = trim(GEMINI_API_KEY);
-$endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . urlencode($apiKey);
+$endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . urlencode($apiKey);
 
-$ch = curl_init($endpoint);
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER => [
-        'Content-Type: application/json'
-    ],
-    CURLOPT_POSTFIELDS => json_encode($payload),
-    CURLOPT_TIMEOUT => 20,
-    CURLOPT_SSL_VERIFYPEER => false // Facilita compatibilidad con certificados locales en XAMPP
-]);
+$payloadJson = json_encode($payload);
+$responseData = null;
+$httpCode = 0;
+$curlError = '';
 
-$responseRaw = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$curlError = curl_error($ch);
-curl_close($ch);
+// Reintento automático en caso de congestión temporal (503 / 429)
+for ($intento = 1; $intento <= 2; $intento++) {
+    $ch = curl_init($endpoint);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json'
+        ],
+        CURLOPT_POSTFIELDS => $payloadJson,
+        CURLOPT_TIMEOUT => 25,
+        CURLOPT_SSL_VERIFYPEER => false
+    ]);
 
-if ($responseRaw === false || !empty($curlError)) {
+    $responseRaw = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($responseRaw !== false) {
+        $responseData = json_decode($responseRaw, true);
+        if ($httpCode === 200 && !empty($responseData['candidates'])) {
+            break;
+        }
+    }
+
+    if ($httpCode === 503 || $httpCode === 429) {
+        usleep(1200000); // Esperar 1.2 segundos antes de reintentar
+    } else {
+        break;
+    }
+}
+
+if ($responseData === null && !empty($curlError)) {
     http_response_code(500);
     echo json_encode([
         'ok' => false,
@@ -143,25 +164,31 @@ if ($responseRaw === false || !empty($curlError)) {
     exit;
 }
 
-$responseData = json_decode($responseRaw, true);
-
 if ($httpCode !== 200 || !empty($responseData['error'])) {
-    $errorMsg = $responseData['error']['message'] ?? 'Error desconocido al consultar Gemini.';
+    $errorMsg = $responseData['error']['message'] ?? 'El servicio de IA se encuentra ocupado en este momento. Intenta de nuevo en unos segundos.';
     http_response_code($httpCode >= 400 ? $httpCode : 500);
     echo json_encode([
         'ok' => false,
-        'error' => 'Google Gemini API error: ' . $errorMsg
+        'error' => $errorMsg
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// Extraer el texto generado
-$reply = $responseData['candidates'][0]['content']['parts'][0]['text'] ?? null;
+// Extraer el texto generado recorriendo las partes
+$reply = null;
+if (!empty($responseData['candidates'][0]['content']['parts'])) {
+    foreach ($responseData['candidates'][0]['content']['parts'] as $part) {
+        if (!empty($part['text'])) {
+            $reply = $part['text'];
+            break;
+        }
+    }
+}
 
 if (empty($reply)) {
     echo json_encode([
         'ok' => false,
-        'error' => 'No se recibió respuesta válida del modelo.'
+        'error' => 'No se recibió una respuesta válida del tutor en este momento.'
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }
