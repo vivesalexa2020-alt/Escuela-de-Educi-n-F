@@ -19,6 +19,17 @@
       <span>Finanza<span class="texto-verde">Lab</span></span>
     </a>
 
+    <!-- BOTÓN / ACCESO DE CUENTA DE USUARIO -->
+    <div class="cuenta-usuario-barra" id="cuenta-barra">
+      <button class="btn-cuenta-trigger" id="btn-abrir-auth" type="button" aria-label="Crear cuenta o Iniciar sesión">
+        <span class="icono-usuario" id="icono-usuario">👤</span>
+        <div class="info-usuario-preview">
+          <strong id="texto-usuario-estado">Crear cuenta</strong>
+          <small id="subtexto-usuario">o Iniciar sesión</small>
+        </div>
+      </button>
+    </div>
+
     <p class="menu-titulo">MENÚ PRINCIPAL</p>
 
     <nav class="navegacion" id="navegacion">
@@ -27,6 +38,7 @@
       <a href="#reticula" class="enlace-menu"><span>▦</span> Retícula académica</a>
       <a href="#gastos" class="enlace-menu"><span>↗</span> Gastos hormiga</a>
       <a href="#ahorro" class="enlace-menu"><span>♧</span> Mi ahorro</a>
+      <a href="#cuenta" class="enlace-menu enlace-menu-cuenta" id="enlace-menu-cuenta"><span>👤</span> Mi cuenta</a>
     </nav>
 
     <div class="lateral-inferior">
@@ -326,6 +338,61 @@
     <small>FinanzaLab · Proyecto educativo de educación financiera.</small>
     <small>Los ejemplos son educativos y no constituyen asesoría financiera.</small>
   </footer>
+
+  <!-- MODAL DE CREAR CUENTA / INICIAR SESIÓN -->
+  <div class="modal-auth-overlay" id="modal-auth-overlay" hidden>
+    <div class="modal-auth-tarjeta" role="dialog" aria-modal="true" aria-labelledby="auth-modal-titulo">
+      <button class="modal-auth-cerrar" id="btn-cerrar-auth" type="button" aria-label="Cerrar">✕</button>
+      
+      <div class="modal-auth-cabecera">
+        <div class="modal-auth-icono">👤</div>
+        <h3 id="auth-modal-titulo">Portal de Estudiantes</h3>
+        <p>FinanzaLab · Educación Financiera</p>
+      </div>
+
+      <div class="modal-auth-tabs" id="modal-auth-tabs">
+        <button type="button" class="tab-auth activo" id="tab-registro">Crear cuenta</button>
+        <button type="button" class="tab-auth" id="tab-login">Iniciar sesión</button>
+      </div>
+
+      <!-- FORMULARIO CREAR CUENTA -->
+      <form id="form-registro" class="form-auth">
+        <label for="reg-nombre">Nombre completo</label>
+        <input type="text" id="reg-nombre" placeholder="Ej. Alex Vives" maxlength="100" required>
+
+        <label for="reg-email">Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tu@correo.com" maxlength="150" required>
+
+        <label for="reg-password">Contraseña</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres" minlength="6" required>
+
+        <button type="submit" class="boton boton-completo" id="btn-submit-registro">Crear mi cuenta →</button>
+      </form>
+
+      <!-- FORMULARIO INICIAR SESIÓN -->
+      <form id="form-login" class="form-auth" hidden>
+        <label for="login-email">Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tu@correo.com" maxlength="150" required>
+
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" placeholder="Tu contraseña" required>
+
+        <button type="submit" class="boton boton-completo" id="btn-submit-login">Iniciar sesión →</button>
+      </form>
+
+      <!-- MENSAJE DE ESTADO -->
+      <p class="auth-mensaje" id="auth-mensaje" role="status" aria-live="polite"></p>
+
+      <!-- VISTA DE SESIÓN ACTIVA -->
+      <div class="auth-perfil-activo" id="auth-perfil-activo" hidden>
+        <div class="perfil-avatar">👤</div>
+        <h4 id="perfil-nombre">Nombre del alumno</h4>
+        <p id="perfil-email">correo@ejemplo.com</p>
+        <span class="badge-estudiante">Alumno activo</span>
+        <button type="button" class="boton boton-secundario boton-completo" id="btn-cerrar-sesion">Cerrar mi sesión</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ASISTENTE INTELIGENTE (FINANBOT) -->
   <div class="chat-widget" id="chat-widget">

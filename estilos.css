@@ -1477,4 +1477,278 @@ form .boton {
   }
 }
 
+/* ========================================================
+   CUENTA DE USUARIO Y MODAL DE REGISTRO / LOGIN
+   ======================================================== */
+.cuenta-usuario-barra {
+  padding: 16px 8px 0;
+}
+
+.btn-cuenta-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 10px 12px;
+  color: var(--blanco);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cuenta-trigger:hover {
+  background: rgba(32, 184, 166, 0.16);
+  border-color: var(--turquesa);
+  transform: translateY(-1px);
+}
+
+.icono-usuario {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--verde), var(--turquesa));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--blanco);
+  flex-shrink: 0;
+}
+
+.info-usuario-preview {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.info-usuario-preview strong {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--blanco);
+}
+
+.info-usuario-preview small {
+  font-size: 11px;
+  color: #9fb4ca;
+}
+
+/* MODAL AUTH OVERLAY */
+.modal-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(14, 30, 52, 0.72);
+  backdrop-filter: blur(5px);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: authFadeIn 0.2s ease forwards;
+}
+
+.modal-auth-overlay[hidden] {
+  display: none !important;
+}
+
+@keyframes authFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-auth-tarjeta {
+  background: var(--blanco);
+  border-radius: 22px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 410px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  position: relative;
+  animation: authSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes authSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-auth-cerrar {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: var(--texto-suave);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-auth-cerrar:hover {
+  background: #e2e8f0;
+  color: var(--texto);
+}
+
+.modal-auth-cabecera {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.modal-auth-icono {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--azul), var(--verde));
+  color: var(--blanco);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.modal-auth-cabecera h3 {
+  font-size: 20px;
+  color: var(--azul);
+  margin-bottom: 4px;
+}
+
+.modal-auth-cabecera p {
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.modal-auth-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  margin-bottom: 22px;
+  gap: 4px;
+}
+
+.tab-auth {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-suave);
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-auth.activo {
+  background: var(--blanco);
+  color: var(--azul);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.form-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-auth label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-top: 6px;
+}
+
+.form-auth input {
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-auth input:focus {
+  border-color: var(--verde);
+}
+
+.form-auth button[type="submit"] {
+  margin-top: 16px;
+}
+
+.auth-mensaje {
+  font-size: 13px;
+  margin-top: 14px;
+  text-align: center;
+  min-height: 20px;
+}
+
+.auth-mensaje.error {
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.auth-mensaje.exito {
+  color: #059669;
+  background: #ecfdf5;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+/* PERFIL ACTIVO DENTRO DEL MODAL */
+.auth-perfil-activo {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.perfil-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--verde);
+  color: var(--blanco);
+  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+}
+
+.auth-perfil-activo h4 {
+  font-size: 18px;
+  color: var(--azul);
+  margin-bottom: 4px;
+}
+
+.auth-perfil-activo p {
+  font-size: 13px;
+  color: var(--texto-suave);
+  margin-bottom: 14px;
+}
+
+.badge-estudiante {
+  display: inline-block;
+  background: var(--verde-claro);
+  color: var(--verde);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 14px;
+  margin-bottom: 22px;
+}
+
+
 

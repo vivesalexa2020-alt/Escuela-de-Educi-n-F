@@ -658,11 +658,185 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ========================================================
+  // CONTROLADOR DE CUENTA DE USUARIO (REGISTRO / LOGIN)
+  // ========================================================
+  const btnAbrirAuth = document.getElementById("btn-abrir-auth");
+  const enlaceMenuCuenta = document.getElementById("enlace-menu-cuenta");
+  const modalAuthOverlay = document.getElementById("modal-auth-overlay");
+  const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
+  const tabRegistro = document.getElementById("tab-registro");
+  const tabLogin = document.getElementById("tab-login");
+  const modalAuthTabs = document.getElementById("modal-auth-tabs");
+  const formRegistro = document.getElementById("form-registro");
+  const formLogin = document.getElementById("form-login");
+  const authMensaje = document.getElementById("auth-mensaje");
+  const authPerfilActivo = document.getElementById("auth-perfil-activo");
+  const btnCerrarSesion = document.getElementById("btn-cerrar-sesion");
+
+  const textoUsuarioEstado = document.getElementById("texto-usuario-estado");
+  const subtextoUsuario = document.getElementById("subtexto-usuario");
+  const perfilNombre = document.getElementById("perfil-nombre");
+  const perfilEmail = document.getElementById("perfil-email");
+
+  let usuarioActual = null;
+
+  function mostrarMensajeAuth(texto, tipo = "") {
+    if (!authMensaje) return;
+    authMensaje.textContent = texto;
+    authMensaje.className = `auth-mensaje ${tipo}`.trim();
+  }
+
+  function cambiarPestanaAuth(pestana) {
+    mostrarMensajeAuth("");
+    if (pestana === "registro") {
+      tabRegistro?.classList.add("activo");
+      tabLogin?.classList.remove("activo");
+      formRegistro?.removeAttribute("hidden");
+      formLogin?.setAttribute("hidden", "true");
+    } else {
+      tabLogin?.classList.add("activo");
+      tabRegistro?.classList.remove("activo");
+      formLogin?.removeAttribute("hidden");
+      formRegistro?.setAttribute("hidden", "true");
+    }
+  }
+
+  function actualizarUIUsuario(user) {
+    usuarioActual = user;
+    if (user) {
+      if (textoUsuarioEstado) textoUsuarioEstado.textContent = `Hola, ${user.nombre.split(" ")[0]}`;
+      if (subtextoUsuario) subtextoUsuario.textContent = "Alumno activo ✦";
+      if (perfilNombre) perfilNombre.textContent = user.nombre;
+      if (perfilEmail) perfilEmail.textContent = user.email;
+
+      // Ocultar formularios y tabs, mostrar perfil activo
+      modalAuthTabs?.setAttribute("hidden", "true");
+      formRegistro?.setAttribute("hidden", "true");
+      formLogin?.setAttribute("hidden", "true");
+      authPerfilActivo?.removeAttribute("hidden");
+    } else {
+      if (textoUsuarioEstado) textoUsuarioEstado.textContent = "Crear cuenta";
+      if (subtextoUsuario) subtextoUsuario.textContent = "o Iniciar sesión";
+
+      modalAuthTabs?.removeAttribute("hidden");
+      authPerfilActivo?.setAttribute("hidden", "true");
+      cambiarPestanaAuth("registro");
+    }
+  }
+
+  function abrirModalAuth() {
+    mostrarMensajeAuth("");
+    if (modalAuthOverlay) modalAuthOverlay.hidden = false;
+  }
+
+  function cerrarModalAuth() {
+    if (modalAuthOverlay) modalAuthOverlay.hidden = true;
+    mostrarMensajeAuth("");
+  }
+
+  async function verificarSesionUsuario() {
+    try {
+      const resp = await fetch("api/auth.php?action=check");
+      const data = await resp.json();
+      if (data.ok && data.logged_in && data.user) {
+        actualizarUIUsuario(data.user);
+      } else {
+        actualizarUIUsuario(null);
+      }
+    } catch {
+      actualizarUIUsuario(null);
+    }
+  }
+
+  formRegistro?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const nombre = document.getElementById("reg-nombre")?.value.trim();
+    const email = document.getElementById("reg-email")?.value.trim();
+    const password = document.getElementById("reg-password")?.value;
+
+    mostrarMensajeAuth("Creando tu cuenta...", "");
+
+    try {
+      const resp = await fetch("api/auth.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "registro", nombre, email, password })
+      });
+      const data = await resp.json();
+
+      if (data.ok && data.user) {
+        mostrarMensajeAuth("¡Cuenta creada con éxito! Bienvenido.", "exito");
+        setTimeout(() => {
+          actualizarUIUsuario(data.user);
+          cerrarModalAuth();
+        }, 1200);
+      } else {
+        mostrarMensajeAuth(data.error || "No se pudo registrar.", "error");
+      }
+    } catch {
+      mostrarMensajeAuth("Error de conexión al registrar cuenta.", "error");
+    }
+  });
+
+  formLogin?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const email = document.getElementById("login-email")?.value.trim();
+    const password = document.getElementById("login-password")?.value;
+
+    mostrarMensajeAuth("Validando credenciales...", "");
+
+    try {
+      const resp = await fetch("api/auth.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "login", email, password })
+      });
+      const data = await resp.json();
+
+      if (data.ok && data.user) {
+        mostrarMensajeAuth("¡Bienvenido de vuelta!", "exito");
+        setTimeout(() => {
+          actualizarUIUsuario(data.user);
+          cerrarModalAuth();
+        }, 1200);
+      } else {
+        mostrarMensajeAuth(data.error || "Error al iniciar sesión.", "error");
+      }
+    } catch {
+      mostrarMensajeAuth("Error de conexión al iniciar sesión.", "error");
+    }
+  });
+
+  btnCerrarSesion?.addEventListener("click", async () => {
+    try {
+      await fetch("api/auth.php?action=logout");
+      actualizarUIUsuario(null);
+      mostrarMensajeAuth("Has cerrado tu sesión.", "exito");
+    } catch {
+      actualizarUIUsuario(null);
+    }
+  });
+
+  btnAbrirAuth?.addEventListener("click", abrirModalAuth);
+  enlaceMenuCuenta?.addEventListener("click", e => {
+    e.preventDefault();
+    abrirModalAuth();
+  });
+  btnCerrarAuth?.addEventListener("click", cerrarModalAuth);
+  modalAuthOverlay?.addEventListener("click", e => {
+    if (e.target === modalAuthOverlay) cerrarModalAuth();
+  });
+
+  tabRegistro?.addEventListener("click", () => cambiarPestanaAuth("registro"));
+  tabLogin?.addEventListener("click", () => cambiarPestanaAuth("login"));
+
   // CARGAR INFORMACIÓN AL ABRIR LA PÁGINA
   actualizarGastos();
   actualizarAhorro();
   actualizarBotonesLecciones();
   actualizarInicio();
+  verificarSesionUsuario();
 });
 
 
