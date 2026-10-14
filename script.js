@@ -67,19 +67,56 @@ document.addEventListener("DOMContentLoaded", () => {
     menuToggle.textContent = abierto ? "✕" : "☰";
   });
 
-  navegacion.querySelectorAll("a").forEach(enlace => {
-    enlace.addEventListener("click", () => {
-      navegacion.querySelectorAll("a").forEach(item => {
-        item.classList.remove("activo");
-      });
+  // NAVEGACIÓN ENTRE SECCIONES (se muestra una vista a la vez)
+  const llamadoFinal = document.querySelector(".llamado-final");
 
-      enlace.classList.add("activo");
-      barraLateral.classList.remove("menu-abierto");
-      menuToggle.setAttribute("aria-expanded", "false");
-      menuToggle.setAttribute("aria-label", "Abrir menú");
-      menuToggle.textContent = "☰";
+  const vistas = {
+    inicio: [document.getElementById("inicio"), llamadoFinal],
+    nosotros: [document.getElementById("nosotros")],
+    reticula: [document.getElementById("reticula")],
+    gastos: [document.getElementById("gastos")],
+    ahorro: [document.getElementById("ahorro")]
+  };
+
+  const elementosVista = Object.values(vistas).flat().filter(Boolean);
+
+  function cerrarMenuMovil() {
+    barraLateral.classList.remove("menu-abierto");
+    menuToggle.setAttribute("aria-expanded", "false");
+    menuToggle.setAttribute("aria-label", "Abrir menú");
+    menuToggle.textContent = "☰";
+  }
+
+  function mostrarVista(id) {
+    const activa = vistas[id] ? id : "inicio";
+
+    elementosVista.forEach(elemento => {
+      elemento.hidden = !vistas[activa].includes(elemento);
+    });
+
+    navegacion.querySelectorAll("a").forEach(enlace => {
+      enlace.classList.toggle(
+        "activo",
+        enlace.getAttribute("href") === `#${activa}`
+      );
+    });
+
+    cerrarMenuMovil();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.querySelectorAll('a[href^="#"]').forEach(enlace => {
+    const destino = enlace.getAttribute("href").slice(1);
+    if (!vistas[destino]) return;
+
+    enlace.addEventListener("click", evento => {
+      evento.preventDefault();
+      mostrarVista(destino);
+      history.replaceState(null, "", `#${destino}`);
     });
   });
+
+  mostrarVista(window.location.hash.slice(1));
 
   // PROGRESO GENERAL DE LA ESCUELA
   function actualizarInicio() {
@@ -662,7 +699,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // CONTROLADOR DE CUENTA DE USUARIO (REGISTRO / LOGIN)
   // ========================================================
   const btnAbrirAuth = document.getElementById("btn-abrir-auth");
-  const enlaceMenuCuenta = document.getElementById("enlace-menu-cuenta");
   const modalAuthOverlay = document.getElementById("modal-auth-overlay");
   const btnCerrarAuth = document.getElementById("btn-cerrar-auth");
   const tabRegistro = document.getElementById("tab-registro");
@@ -869,10 +905,6 @@ document.addEventListener("DOMContentLoaded", () => {
   btnVolverLogin?.addEventListener("click", () => cambiarPestanaAuth("login"));
 
   btnAbrirAuth?.addEventListener("click", abrirModalAuth);
-  enlaceMenuCuenta?.addEventListener("click", e => {
-    e.preventDefault();
-    abrirModalAuth();
-  });
   btnCerrarAuth?.addEventListener("click", cerrarModalAuth);
   modalAuthOverlay?.addEventListener("click", e => {
     if (e.target === modalAuthOverlay) cerrarModalAuth();
