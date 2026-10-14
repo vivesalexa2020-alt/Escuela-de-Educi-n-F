@@ -31,6 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }).format(cantidad);
   }
 
+  function apiUrl(ruta) {
+    const base = String(window.BASE_URL || "").replace(/\/$/, "");
+    return `${base}/${String(ruta || "").replace(/^\//, "")}`;
+  }
+
   function fechaLocal() {
     const fecha = new Date();
     const anio = fecha.getFullYear();
@@ -688,7 +693,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarEscribiendo();
 
     try {
-      const respuesta = await fetch("api/chat.php", {
+      const respuesta = await fetch(apiUrl("api/chat"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -706,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
         historialChat.push({ role: "model", text: data.reply });
       } else if (data.needs_key) {
         agregarMensaje(
-          "⚙️ **Casi listo para comenzar:**\nPara activar a FinanBot, por favor abre el archivo `api/config.php` en Visual Studio Code y pega tu clave API de Google Gemini.",
+          "⚙️ **Casi listo para comenzar:**\nPara activar a FinanBot, por favor abre el archivo `config/config.php` en Visual Studio Code y pega tu clave API de Google Gemini.",
           "bot"
         );
       } else {
@@ -753,56 +758,56 @@ document.addEventListener("DOMContentLoaded", () => {
     {
       titulo: "Inicio",
       descripcion: "Tu resumen, progreso y consejos del día.",
-      url: "index.html",
+      url: "",
       icono: "fa-house",
       claves: "inicio panel dashboard resumen consejos progreso principal portada"
     },
     {
       titulo: "Retícula académica",
       descripcion: "Los tres niveles de aprendizaje financiero.",
-      url: "reticula.html",
+      url: "reticula",
       icono: "fa-graduation-cap",
       claves: "reticula niveles lecciones nivel curso clases aprender academia leccion inversion invertir riesgo rendimiento interes compuesto"
     },
     {
       titulo: "Materiales",
       descripcion: "Guías, plantillas y recursos descargables.",
-      url: "materiales.html",
+      url: "materiales",
       icono: "fa-book-open",
       claves: "materiales guias plantillas checklist glosario recursos descargar presupuesto 50/30/20 fondo de emergencia ahorro"
     },
     {
       titulo: "Gastos hormiga",
       descripcion: "Registra y controla tus pequeños gastos.",
-      url: "gastos-hormiga.html",
+      url: "gastos-hormiga",
       icono: "fa-wallet",
       claves: "gastos hormiga registrar gasto cafe antojo compras controlar categorias comida transporte entretenimiento servicios historial"
     },
     {
       titulo: "Mi ahorro",
       descripcion: "Define y sigue tu meta de ahorro.",
-      url: "mi-ahorro.html",
+      url: "mi-ahorro",
       icono: "fa-piggy-bank",
       claves: "ahorro ahorrar alcancia alcancia cerdito guardar dinero meta depositar"
     },
     {
       titulo: "Metas",
       descripcion: "Crea y sigue tus metas financieras.",
-      url: "metas.html",
+      url: "metas",
       icono: "fa-bullseye",
       claves: "metas objetivos meta ahorrar para proposito"
     },
     {
       titulo: "Logros",
       descripcion: "Tus insignias y recompensas.",
-      url: "logros.html",
+      url: "logros",
       icono: "fa-trophy",
       claves: "logros insignias medallas premios recompensas trofeo"
     },
     {
       titulo: "Configuración",
       descripcion: "Cuenta, avatar, moneda y preferencias.",
-      url: "configuracion.html",
+      url: "configuracion",
       icono: "fa-gear",
       claves: "configuracion ajustes cuenta perfil avatar moneda contrasena sesion opciones preferencias"
     }
@@ -889,7 +894,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         resultados.forEach((pagina, i) => {
           const opcion = document.createElement("a");
-          opcion.href = pagina.url;
+          opcion.href = apiUrl(pagina.url);
           opcion.className = "search-resultado";
           opcion.setAttribute("role", "option");
           opcion.dataset.indice = String(i);
@@ -1066,7 +1071,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function verificarSesionUsuario() {
     try {
-      const resp = await fetch("api/auth.php?action=check");
+      const resp = await fetch(`${apiUrl("api/auth")}?action=check`);
       const data = await resp.json();
       if (data.ok && data.logged_in && data.user) {
         actualizarUIUsuario(data.user);
@@ -1087,7 +1092,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarMensajeAuth("Creando tu cuenta...", "");
 
     try {
-      const resp = await fetch("api/auth.php", {
+      const resp = await fetch(apiUrl("api/auth"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "registro", nombre, email, password })
@@ -1116,7 +1121,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarMensajeAuth("Validando credenciales...", "");
 
     try {
-      const resp = await fetch("api/auth.php", {
+      const resp = await fetch(apiUrl("api/auth"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "login", email, password })
@@ -1139,7 +1144,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnCerrarSesion?.addEventListener("click", async () => {
     try {
-      await fetch("api/auth.php?action=logout");
+      await fetch(`${apiUrl("api/auth")}?action=logout`);
       actualizarUIUsuario(null);
       mostrarMensajeAuth("Has cerrado tu sesión.", "exito");
     } catch {
@@ -1157,7 +1162,7 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarMensajeAuth("Actualizando tu contraseña...", "");
 
     try {
-      const resp = await fetch("api/auth.php", {
+      const resp = await fetch(apiUrl("api/auth"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "recuperar", email, password })
@@ -1334,7 +1339,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     try {
-      const resp = await fetch("api/auth.php", {
+      const resp = await fetch(apiUrl("api/auth"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "actualizar_avatar", avatar: valor })

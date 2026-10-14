@@ -1,5 +1,5 @@
 # Archivo de configuración con la clave secreta de API
-api/config.php
+config/config.php
 
 # Archivos de registro y temporales
 *.log

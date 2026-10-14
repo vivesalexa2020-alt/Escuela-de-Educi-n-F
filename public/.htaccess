@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Servir directamente los archivos y carpetas que existen (css, js, img...).
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás se resuelve con el front controller.
+RewriteRule ^ index.php [QSA,L]
