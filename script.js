@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function formatoDinero(cantidad) {
     return new Intl.NumberFormat("es-MX", {
       style: "currency",
-      currency: "MXN"
+      currency: (config && config.moneda) || "MXN"
     }).format(cantidad);
   }
 
@@ -55,17 +55,36 @@ document.addEventListener("DOMContentLoaded", () => {
     leccionesCompletadas = [];
   }
 
-  // MENÚ LATERAL Y MENÚ PARA CELULAR
-  menuToggle.addEventListener("click", () => {
-    const abierto = barraLateral.classList.toggle("menu-abierto");
+  const CONFIG_POR_DEFECTO = {
+    nombre: "",
+    moneda: "MXN",
+    animacion: true,
+    consejos: true
+  };
 
-    menuToggle.setAttribute("aria-expanded", String(abierto));
-    menuToggle.setAttribute(
-      "aria-label",
-      abierto ? "Cerrar menú" : "Abrir menú"
-    );
-    menuToggle.textContent = abierto ? "✕" : "☰";
-  });
+  let config = leerDatos("finanzalab_config", { ...CONFIG_POR_DEFECTO });
+  let metas = leerDatos("finanzalab_metas", []);
+
+  if (typeof config !== "object" || config === null) {
+    config = { ...CONFIG_POR_DEFECTO };
+  }
+  config = { ...CONFIG_POR_DEFECTO, ...config };
+
+  if (!Array.isArray(metas)) metas = [];
+
+  // MENÚ LATERAL Y MENÚ PARA CELULAR
+  if (menuToggle && barraLateral) {
+    menuToggle.addEventListener("click", () => {
+      const abierto = barraLateral.classList.toggle("menu-abierto");
+
+      menuToggle.setAttribute("aria-expanded", String(abierto));
+      menuToggle.setAttribute(
+        "aria-label",
+        abierto ? "Cerrar menú" : "Abrir menú"
+      );
+      menuToggle.textContent = abierto ? "✕" : "☰";
+    });
+  }
 
   // NAVEGACIÓN ENTRE SECCIONES (se muestra una vista a la vez)
   const llamadoFinal = document.querySelector(".llamado-final");
@@ -81,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const elementosVista = Object.values(vistas).flat().filter(Boolean);
 
   function cerrarMenuMovil() {
+    if (!barraLateral || !menuToggle) return;
     barraLateral.classList.remove("menu-abierto");
     menuToggle.setAttribute("aria-expanded", "false");
     menuToggle.setAttribute("aria-label", "Abrir menú");
@@ -88,6 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function mostrarVista(id) {
+    if (!navegacion) return;
     const activa = vistas[id] ? id : "inicio";
 
     elementosVista.forEach(elemento => {
@@ -120,21 +141,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // PROGRESO GENERAL DE LA ESCUELA
   function actualizarInicio() {
-    document.getElementById("hero-gastos").textContent =
-      String(gastos.length);
+    const totalGastos = gastos.length;
 
-    document.getElementById("hero-ahorro").textContent =
-      formatoDinero(Number(metaAhorro.actual) || 0);
+    const elGastos =
+      document.getElementById("hero-gastos") ||
+      document.getElementById("stat-gastos");
+    if (elGastos) elGastos.textContent = String(totalGastos);
+
+    const elAhorro =
+      document.getElementById("hero-ahorro") ||
+      document.getElementById("stat-ahorro");
+    if (elAhorro) {
+      elAhorro.textContent = formatoDinero(Number(metaAhorro.actual) || 0);
+    }
+
+    const elLecciones = document.getElementById("stat-lecciones");
+    if (elLecciones) {
+      elLecciones.textContent = String(leccionesCompletadas.length);
+    }
+
+    const elMetas = document.getElementById("stat-metas");
+    if (elMetas) {
+      const activas = metas.filter(
+        meta => Number(meta.actual) < Number(meta.objetivo)
+      ).length;
+      elMetas.textContent = String(activas);
+    }
 
     const porcentaje = Math.round(
       (leccionesCompletadas.length / 3) * 100
     );
 
-    document.getElementById("progreso-general").style.width =
-      `${porcentaje}%`;
+    const progresoGeneral = document.getElementById("progreso-general");
+    if (progresoGeneral) progresoGeneral.style.width = `${porcentaje}%`;
 
-    document.getElementById("progreso-texto").textContent =
-      `${porcentaje}%`;
+    const progresoTexto = document.getElementById("progreso-texto");
+    if (progresoTexto) progresoTexto.textContent = `${porcentaje}%`;
+
+    const anillo = document.getElementById("progreso-anillo");
+    if (anillo) {
+      anillo.style.background =
+        `conic-gradient(var(--accent-teal) ${porcentaje}%, ` +
+        `var(--card-border) ${porcentaje}%)`;
+    }
   }
 
   // CONTENIDO DE LOS NIVELES
@@ -206,21 +255,23 @@ document.addEventListener("DOMContentLoaded", () => {
           : "Marcar actividad como completada ✓";
 
       panelLeccion.hidden = false;
-      panelLeccion.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+      if (typeof panelLeccion.scrollIntoView === "function") {
+        panelLeccion.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }
     });
   });
 
-  document.getElementById("cerrar-leccion").addEventListener(
+  document.getElementById("cerrar-leccion")?.addEventListener(
     "click",
     () => {
       panelLeccion.hidden = true;
     }
   );
 
-  botonCompletar.addEventListener("click", () => {
+  botonCompletar?.addEventListener("click", () => {
     if (leccionActual === null) return;
 
     if (!leccionesCompletadas.includes(leccionActual)) {
@@ -251,7 +302,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const listaGastos = document.getElementById("lista-gastos");
   const mensajeGasto = document.getElementById("mensaje-gasto");
 
-  formularioGasto.addEventListener("submit", evento => {
+  formularioGasto?.addEventListener("submit", evento => {
     evento.preventDefault();
 
     const concepto = campoConcepto.value.trim();
@@ -303,14 +354,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .filter(gasto => gasto.fecha.startsWith(mesActual))
       .reduce((suma, gasto) => suma + gasto.importe, 0);
 
-    document.getElementById("total-hoy").textContent =
-      formatoDinero(totalHoy);
+    const elTotalHoy = document.getElementById("total-hoy");
+    if (elTotalHoy) elTotalHoy.textContent = formatoDinero(totalHoy);
 
-    document.getElementById("total-mes").textContent =
-      formatoDinero(totalMes);
+    const elTotalMes = document.getElementById("total-mes");
+    if (elTotalMes) elTotalMes.textContent = formatoDinero(totalMes);
 
-    document.getElementById("cantidad-gastos").textContent =
-      String(gastos.length);
+    const elCantidadGastos = document.getElementById("cantidad-gastos");
+    if (elCantidadGastos) elCantidadGastos.textContent = String(gastos.length);
 
     listaGastos.replaceChildren();
 
@@ -388,7 +439,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // BORRAR HISTORIAL DE GASTOS
-  document.getElementById("borrar-gastos").addEventListener(
+  document.getElementById("borrar-gastos")?.addEventListener(
     "click",
     () => {
       if (gastos.length === 0) {
@@ -469,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
     campoAhorroActual.value = actual || "";
   }
 
-  formularioAhorro.addEventListener("submit", evento => {
+  formularioAhorro?.addEventListener("submit", evento => {
     evento.preventDefault();
 
     const nombre = campoMetaNombre.value.trim();
@@ -717,6 +768,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const subtextoUsuario = document.getElementById("subtexto-usuario");
   const perfilNombre = document.getElementById("perfil-nombre");
   const perfilEmail = document.getElementById("perfil-email");
+  const sidebarNombre = document.getElementById("sidebar-nombre");
 
   let usuarioActual = null;
 
@@ -757,6 +809,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (subtextoUsuario) subtextoUsuario.textContent = "Alumno activo ✦";
       if (perfilNombre) perfilNombre.textContent = user.nombre;
       if (perfilEmail) perfilEmail.textContent = user.email;
+      if (sidebarNombre) sidebarNombre.textContent = `Hola, ${user.nombre.split(" ")[0]}`;
+
+      const configCuentaNombre = document.getElementById("config-cuenta-nombre");
+      const configCuentaEmail = document.getElementById("config-cuenta-email");
+      if (configCuentaNombre) configCuentaNombre.textContent = user.nombre;
+      if (configCuentaEmail) configCuentaEmail.textContent = user.email;
 
       // Ocultar formularios y tabs, mostrar perfil activo
       modalAuthTabs?.setAttribute("hidden", "true");
@@ -766,11 +824,19 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       if (textoUsuarioEstado) textoUsuarioEstado.textContent = "Crear cuenta";
       if (subtextoUsuario) subtextoUsuario.textContent = "o Iniciar sesión";
+      if (sidebarNombre) sidebarNombre.textContent = "Hola, Usuario";
+
+      const configCuentaNombre = document.getElementById("config-cuenta-nombre");
+      const configCuentaEmail = document.getElementById("config-cuenta-email");
+      if (configCuentaNombre) configCuentaNombre.textContent = "Aún no has iniciado sesión";
+      if (configCuentaEmail) configCuentaEmail.textContent = "Tu progreso se guarda en este navegador.";
 
       modalAuthTabs?.removeAttribute("hidden");
       authPerfilActivo?.setAttribute("hidden", "true");
       cambiarPestanaAuth("registro");
     }
+    const avatar = user && user.avatar ? user.avatar : leerAvatarLocal();
+    aplicarAvatar(avatar);
   }
 
   function abrirModalAuth() {
@@ -913,10 +979,535 @@ document.addEventListener("DOMContentLoaded", () => {
   tabRegistro?.addEventListener("click", () => cambiarPestanaAuth("registro"));
   tabLogin?.addEventListener("click", () => cambiarPestanaAuth("login"));
 
+  // ============ AVATAR (FOTO O ICONO) ============
+  const perfilAvatarEl = document.getElementById("perfil-avatar");
+  const cuentaAvatarEl = document.querySelector(".cuenta-avatar");
+  const sidebarAvatarEl = document.getElementById("sidebar-avatar");
+  const btnEditarAvatar = document.getElementById("btn-editar-avatar");
+  const avatarPicker = document.getElementById("avatar-picker");
+  const avatarColores = document.getElementById("avatar-colores");
+  const avatarIconos = document.getElementById("avatar-iconos");
+  const inputFotoAvatar = document.getElementById("input-foto-avatar");
+  const btnQuitarAvatar = document.getElementById("btn-quitar-avatar");
+
+  const AVATAR_KEY = "finanzalab_avatar";
+  const COLOR_DEFECTO = "#00D2C6";
+  let colorAvatar = COLOR_DEFECTO;
+  let avatarActual = null;
+
+  function leerAvatarLocal() {
+    try { return localStorage.getItem(AVATAR_KEY) || null; } catch { return null; }
+  }
+
+  function guardarAvatarLocal(valor) {
+    try {
+      if (valor) localStorage.setItem(AVATAR_KEY, valor);
+      else localStorage.removeItem(AVATAR_KEY);
+    } catch {}
+  }
+
+  const COLORES_AVATAR = [
+    "#00D2C6", "#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#EF4444",
+    "#10B981", "#F97316", "#06B6D4", "#FACC15", "#64748B", "#1F2937"
+  ];
+
+  const ICONOS_AVATAR = [
+    "fa-user", "fa-user-astronaut", "fa-user-graduate", "fa-user-tie",
+    "fa-user-secret", "fa-user-ninja", "fa-robot", "fa-cat", "fa-dog",
+    "fa-frog", "fa-dragon", "fa-otter", "fa-fish", "fa-hippo", "fa-feather",
+    "fa-paw", "fa-rocket", "fa-star", "fa-heart", "fa-crown", "fa-gem",
+    "fa-lightbulb", "fa-mug-hot", "fa-pizza-slice"
+  ];
+
+  function colorContraste(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const luminancia = 0.299 * r + 0.587 * g + 0.114 * b;
+    return luminancia > 150 ? "#0B132B" : "#FFFFFF";
+  }
+
+  function parseAvatar(avatar) {
+    if (typeof avatar !== "string" || avatar === "") return { tipo: "default" };
+    if (avatar.indexOf("data:image") === 0) return { tipo: "foto" };
+    let m = avatar.match(/^built:#([0-9a-fA-F]{6}):(fa-[a-z0-9-]+)$/);
+    if (m) return { tipo: "built", color: "#" + m[1].toLowerCase(), icon: m[2] };
+    if (avatar.indexOf("icon:") === 0) return { tipo: "icon", icon: avatar.slice(5) };
+    return { tipo: "default" };
+  }
+
+  function renderAvatar(el, avatar) {
+    if (!el) return;
+    el.innerHTML = "";
+    el.style.background = "";
+    el.style.color = "";
+    const a = parseAvatar(avatar);
+    if (a.tipo === "foto") {
+      const img = document.createElement("img");
+      img.src = avatar;
+      img.alt = "Avatar";
+      el.appendChild(img);
+    } else if (a.tipo === "built") {
+      el.style.background = a.color;
+      el.style.color = colorContraste(a.color);
+      el.innerHTML = `<i class="fa-solid ${a.icon}"></i>`;
+    } else if (a.tipo === "icon") {
+      el.innerHTML = `<i class="fa-solid ${a.icon}"></i>`;
+    } else {
+      el.innerHTML = '<i class="fa-solid fa-user"></i>';
+    }
+  }
+
+  function marcarColorActivo() {
+    if (!avatarColores) return;
+    [...avatarColores.querySelectorAll(".avatar-color")].forEach(b => {
+      b.classList.toggle("activo", b.dataset.color.toLowerCase() === colorAvatar.toLowerCase());
+    });
+  }
+
+  function aplicarAvatar(avatar) {
+    avatarActual = avatar || null;
+    const a = parseAvatar(avatarActual);
+    if (a.tipo === "built") colorAvatar = a.color;
+    renderAvatar(perfilAvatarEl, avatarActual);
+    renderAvatar(cuentaAvatarEl, avatarActual);
+    renderAvatar(sidebarAvatarEl, avatarActual);
+    marcarColorActivo();
+    if (avatarIconos) {
+      [...avatarIconos.querySelectorAll("button")].forEach(b => {
+        b.classList.toggle("activo", a.icon === b.dataset.icon);
+      });
+    }
+  }
+
+  function construirColores() {
+    if (!avatarColores || avatarColores.children.length) return;
+    COLORES_AVATAR.forEach(color => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "avatar-color";
+      b.dataset.color = color;
+      b.style.background = color;
+      b.title = color;
+      b.addEventListener("click", () => {
+        colorAvatar = color;
+        marcarColorActivo();
+      });
+      avatarColores.appendChild(b);
+    });
+    marcarColorActivo();
+  }
+
+  function construirIconosAvatar() {
+    if (!avatarIconos || avatarIconos.children.length) return;
+    ICONOS_AVATAR.forEach(icon => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.icon = icon;
+      b.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+      b.addEventListener("click", () => guardarAvatar("built:" + colorAvatar + ":" + icon));
+      avatarIconos.appendChild(b);
+    });
+  }
+
+  async function guardarAvatar(avatar) {
+    const valor = avatar || "";
+    guardarAvatarLocal(valor);
+    if (!usuarioActual) {
+      aplicarAvatar(valor);
+      mostrarMensajeAuth(valor ? "Avatar guardado en este dispositivo." : "Avatar restablecido.", "exito");
+      return;
+    }
+    try {
+      const resp = await fetch("api/auth.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "actualizar_avatar", avatar: valor })
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        usuarioActual.avatar = data.avatar ?? null;
+        aplicarAvatar(usuarioActual.avatar);
+        mostrarMensajeAuth(data.mensaje || "Avatar actualizado.", "exito");
+      } else {
+        mostrarMensajeAuth(data.error || "No se pudo actualizar el avatar.", "error");
+      }
+    } catch {
+      mostrarMensajeAuth("Error de conexión al actualizar el avatar.", "error");
+    }
+  }
+
+  function manejarFotoAvatar(file) {
+    if (!file) return;
+    if (!file.type || file.type.indexOf("image/") !== 0) {
+      mostrarMensajeAuth("Selecciona un archivo de imagen válido.", "error");
+      return;
+    }
+    const lector = new FileReader();
+    lector.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 256;
+        const escala = Math.min(1, max / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * escala);
+        canvas.height = Math.round(img.height * escala);
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        guardarAvatar(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = () => mostrarMensajeAuth("No se pudo leer la imagen.", "error");
+      img.src = lector.result;
+    };
+    lector.readAsDataURL(file);
+  }
+
+  btnEditarAvatar?.addEventListener("click", () => {
+    if (avatarPicker) avatarPicker.hidden = !avatarPicker.hidden;
+  });
+
+  inputFotoAvatar?.addEventListener("change", e => {
+    manejarFotoAvatar(e.target.files && e.target.files[0]);
+    e.target.value = "";
+  });
+
+  btnQuitarAvatar?.addEventListener("click", () => guardarAvatar(""));
+
+  construirColores();
+  construirIconosAvatar();
+
+  // ========================================================
+  // CONFIGURACIÓN DEL USUARIO
+  // ========================================================
+  function aplicarConfig() {
+    if (config.nombre) {
+      const saludo = document.getElementById("sidebar-nombre");
+      if (saludo) saludo.textContent = `Hola, ${config.nombre}`;
+    }
+  }
+
+  function bloquearCerdito() {
+    if (config.animacion === false) {
+      const cerdito = document.getElementById("cerdito-3d");
+      if (cerdito) cerdito.style.display = "none";
+    }
+  }
+
+  const formConfig = document.getElementById("form-config");
+  const inputConfigNombre = document.getElementById("config-nombre");
+  const selectConfigMoneda = document.getElementById("config-moneda");
+  const mensajeConfig = document.getElementById("mensaje-config");
+  const toggleAnimacion = document.getElementById("config-animacion");
+  const toggleConsejos = document.getElementById("config-consejos");
+  const btnConfigCuenta = document.getElementById("btn-config-cuenta");
+  const btnBorrarDatos = document.getElementById("btn-borrar-datos");
+  const mensajeDatos = document.getElementById("mensaje-datos");
+
+  if (inputConfigNombre) inputConfigNombre.value = config.nombre || "";
+  if (selectConfigMoneda) selectConfigMoneda.value = config.moneda || "MXN";
+  if (toggleAnimacion) toggleAnimacion.checked = config.animacion !== false;
+  if (toggleConsejos) toggleConsejos.checked = config.consejos !== false;
+
+  formConfig?.addEventListener("submit", evento => {
+    evento.preventDefault();
+
+    config.nombre = inputConfigNombre.value.trim();
+    config.moneda = selectConfigMoneda.value;
+
+    if (!guardarDatos("finanzalab_config", config)) {
+      if (mensajeConfig) {
+        mensajeConfig.textContent = "No se pudieron guardar tus ajustes.";
+        mensajeConfig.classList.add("error");
+      }
+      return;
+    }
+
+    if (mensajeConfig) {
+      mensajeConfig.textContent = "¡Tus ajustes se guardaron!";
+      mensajeConfig.classList.remove("error");
+    }
+
+    aplicarConfig();
+    if (document.getElementById("lista-gastos")) actualizarGastos();
+    if (document.getElementById("ahorro-guardado")) actualizarAhorro();
+    if (document.getElementById("lista-metas")) renderMetas();
+    actualizarInicio();
+  });
+
+  toggleAnimacion?.addEventListener("change", () => {
+    config.animacion = toggleAnimacion.checked;
+    guardarDatos("finanzalab_config", config);
+    if (config.animacion) {
+      const cerdito = document.getElementById("cerdito-3d");
+      if (cerdito) cerdito.style.display = "";
+    } else {
+      bloquearCerdito();
+    }
+  });
+
+  toggleConsejos?.addEventListener("change", () => {
+    config.consejos = toggleConsejos.checked;
+    guardarDatos("finanzalab_config", config);
+  });
+
+  btnConfigCuenta?.addEventListener("click", () => {
+    document.getElementById("btn-abrir-auth")?.click();
+  });
+
+  btnBorrarDatos?.addEventListener("click", () => {
+    const confirmar = confirm(
+      "¿Quieres borrar tus gastos, metas y ajustes guardados en este navegador? Esta acción no se puede deshacer."
+    );
+    if (!confirmar) return;
+
+    [
+      "finanzalab_gastos",
+      "finanzalab_meta",
+      "finanzalab_lecciones",
+      "finanzalab_metas",
+      "finanzalab_config"
+    ].forEach(clave => {
+      try {
+        localStorage.removeItem(clave);
+      } catch {}
+    });
+
+    if (mensajeDatos) {
+      mensajeDatos.textContent = "Datos borrados. Recargando...";
+      mensajeDatos.classList.remove("error");
+    }
+    setTimeout(() => window.location.reload(), 800);
+  });
+
+  // ========================================================
+  // METAS FINANCIERAS (VARIAS)
+  // ========================================================
+  const listaMetas = document.getElementById("lista-metas");
+
+  function renderMetas() {
+    if (!listaMetas) return;
+
+    listaMetas.innerHTML = "";
+
+    metas.forEach(meta => {
+      const objetivo = Number(meta.objetivo) || 0;
+      const actual = Number(meta.actual) || 0;
+      const porcentaje =
+        objetivo > 0 ? Math.min(Math.round((actual / objetivo) * 100), 100) : 0;
+      const completa = objetivo > 0 && actual >= objetivo;
+
+      const item = document.createElement("div");
+      item.className = "data-item";
+
+      const info = document.createElement("div");
+      info.className = "data-info";
+
+      const top = document.createElement("div");
+      top.className = "data-top";
+
+      const nombre = document.createElement("strong");
+      nombre.textContent = meta.nombre;
+
+      const monto = document.createElement("span");
+      monto.textContent =
+        `${formatoDinero(actual)} / ${formatoDinero(objetivo)}`;
+
+      top.append(nombre, monto);
+
+      const pista = document.createElement("div");
+      pista.className = "progress-track";
+      const relleno = document.createElement("div");
+      relleno.className = "progress-fill";
+      relleno.style.width = `${porcentaje}%`;
+      pista.appendChild(relleno);
+
+      const sub = document.createElement("span");
+      sub.className = "data-sub";
+      sub.textContent = completa
+        ? "¡Meta alcanzada!"
+        : `${porcentaje}% · faltan ${formatoDinero(objetivo - actual)}`;
+
+      info.append(top, pista, sub);
+
+      const eliminar = document.createElement("button");
+      eliminar.type = "button";
+      eliminar.className = "icon-btn";
+      eliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      eliminar.setAttribute("aria-label", `Eliminar meta ${meta.nombre}`);
+      eliminar.addEventListener("click", () => {
+        metas = metas.filter(m => m.id !== meta.id);
+        guardarDatos("finanzalab_metas", metas);
+        renderMetas();
+        actualizarInicio();
+      });
+
+      item.append(info, eliminar);
+      listaMetas.appendChild(item);
+    });
+
+    const activas = metas.filter(m => Number(m.actual) < Number(m.objetivo)).length;
+    const completadas = metas.filter(
+      m => Number(m.objetivo) > 0 && Number(m.actual) >= Number(m.objetivo)
+    ).length;
+
+    const elActivas = document.getElementById("metas-activas");
+    const elCompletadas = document.getElementById("metas-completadas");
+    if (elActivas) elActivas.textContent = String(activas);
+    if (elCompletadas) elCompletadas.textContent = String(completadas);
+  }
+
+  document.getElementById("form-meta")?.addEventListener("submit", evento => {
+    evento.preventDefault();
+
+    const mensajeMeta = document.getElementById("mensaje-meta");
+    const nombre = document.getElementById("objetivo-nombre").value.trim();
+    const monto = Number(document.getElementById("objetivo-monto").value);
+    const actual = Number(document.getElementById("objetivo-actual").value);
+
+    if (
+      !nombre ||
+      !Number.isFinite(monto) ||
+      !Number.isFinite(actual) ||
+      monto <= 0 ||
+      actual < 0 ||
+      monto > 100000000 ||
+      actual > 100000000
+    ) {
+      if (mensajeMeta) {
+        mensajeMeta.textContent = "Escribe un nombre y montos válidos.";
+        mensajeMeta.classList.add("error");
+      }
+      return;
+    }
+
+    metas.push({ id: `meta-${Date.now()}`, nombre, objetivo: monto, actual });
+
+    if (!guardarDatos("finanzalab_metas", metas)) {
+      metas.pop();
+      if (mensajeMeta) {
+        mensajeMeta.textContent = "No se pudo guardar la meta.";
+        mensajeMeta.classList.add("error");
+      }
+      return;
+    }
+
+    if (mensajeMeta) {
+      mensajeMeta.textContent = "¡Meta creada!";
+      mensajeMeta.classList.remove("error");
+    }
+    evento.target.reset();
+    renderMetas();
+    actualizarInicio();
+  });
+
+  // ========================================================
+  // LOGROS / INSIGNIAS
+  // ========================================================
+  function renderLogros() {
+    const contenedor = document.getElementById("badges-grid");
+    if (!contenedor) return;
+
+    const totalLecciones = 3;
+    const logros = [
+      {
+        icono: "fa-shoe-prints",
+        titulo: "Primer paso",
+        desc: "Registra tu primer gasto hormiga.",
+        ok: gastos.length >= 1
+      },
+      {
+        icono: "fa-bug",
+        titulo: "Cazador de hormigas",
+        desc: "Registra 10 gastos hormiga.",
+        ok: gastos.length >= 10
+      },
+      {
+        icono: "fa-piggy-bank",
+        titulo: "Ahorrador",
+        desc: "Define una meta de ahorro.",
+        ok: Number(metaAhorro.objetivo) > 0
+      },
+      {
+        icono: "fa-trophy",
+        titulo: "Meta cumplida",
+        desc: "Alcanza tu meta de ahorro.",
+        ok:
+          Number(metaAhorro.objetivo) > 0 &&
+          Number(metaAhorro.actual) >= Number(metaAhorro.objetivo)
+      },
+      {
+        icono: "fa-book-open",
+        titulo: "Aprendiz",
+        desc: "Completa una lección.",
+        ok: leccionesCompletadas.length >= 1
+      },
+      {
+        icono: "fa-graduation-cap",
+        titulo: "Estudiante estrella",
+        desc: "Completa las tres lecciones.",
+        ok: leccionesCompletadas.length >= totalLecciones
+      },
+      {
+        icono: "fa-bullseye",
+        titulo: "Soñador",
+        desc: "Crea una meta en Metas.",
+        ok: metas.length >= 1
+      },
+      {
+        icono: "fa-layer-group",
+        titulo: "Coleccionista",
+        desc: "Crea tres metas.",
+        ok: metas.length >= 3
+      }
+    ];
+
+    contenedor.innerHTML = "";
+    let desbloqueadas = 0;
+
+    logros.forEach(logro => {
+      if (logro.ok) desbloqueadas++;
+
+      const card = document.createElement("article");
+      card.className = `badge-card ${logro.ok ? "desbloqueado" : "bloqueado"}`;
+
+      const icono = document.createElement("div");
+      icono.className = "badge-icon";
+      icono.innerHTML = `<i class="fa-solid ${logro.icono}"></i>`;
+
+      const titulo = document.createElement("h4");
+      titulo.textContent = logro.titulo;
+
+      const desc = document.createElement("p");
+      desc.textContent = logro.desc;
+
+      const estado = document.createElement("span");
+      estado.className = "badge-estado";
+      estado.textContent = logro.ok ? "Desbloqueado" : "Bloqueado";
+
+      card.append(icono, titulo, desc, estado);
+      contenedor.appendChild(card);
+    });
+
+    const contador = document.getElementById("logros-count");
+    if (contador) {
+      contador.textContent = `${desbloqueadas} de ${logros.length} desbloqueadas`;
+    }
+
+    const barra = document.getElementById("logros-barra");
+    if (barra) {
+      barra.style.width = `${Math.round((desbloqueadas / logros.length) * 100)}%`;
+    }
+  }
+
   // CARGAR INFORMACIÓN AL ABRIR LA PÁGINA
-  actualizarGastos();
-  actualizarAhorro();
-  actualizarBotonesLecciones();
+  // Inicializar solo las vistas que existen en esta página
+  if (document.getElementById("lista-gastos")) actualizarGastos();
+  if (document.getElementById("ahorro-guardado")) actualizarAhorro();
+  if (document.querySelector("[data-leccion]")) actualizarBotonesLecciones();
+  if (document.getElementById("lista-metas")) renderMetas();
+  if (document.getElementById("badges-grid")) renderLogros();
+  aplicarConfig();
+  bloquearCerdito();
   actualizarInicio();
   verificarSesionUsuario();
 });

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - FinanzaLab</title>
+    
+    <!-- Fuente moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tu archivo CSS -->
+    <link rel="stylesheet" href="estilos.css?v=17">
+</head>
+<body>
+
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar">
+        <div class="logo">
+            <!-- Usando tu logo real -->
+            <img src="img/logo.png" alt="FinanzaLab Logo" style="width: 40px; height: 40px; object-fit: contain;">
+            <div>FinanzaLab<span>Escuela Financiera</span></div>
+        </div>
+
+                <ul class="menu">
+            <li><a href="index.html"><i class="fa-solid fa-house"></i> Inicio</a></li>
+            <li><a href="reticula.html"><i class="fa-solid fa-graduation-cap"></i> Retícula académica</a></li>
+            <li><a href="gastos-hormiga.html"><i class="fa-solid fa-wallet"></i> Gastos hormiga</a></li>
+            <li><a href="mi-ahorro.html"><i class="fa-solid fa-piggy-bank"></i> Mi ahorro</a></li>
+            <li><a href="metas.html"><i class="fa-solid fa-bullseye"></i> Metas</a></li>
+            <li><a href="logros.html"><i class="fa-solid fa-trophy"></i> Logros</a></li>
+            <li><a href="configuracion.html" class="active"><i class="fa-solid fa-gear"></i> Configuración</a></li>
+        </ul>
+
+        <div class="sidebar-footer">
+            <i class="fa-solid fa-seedling icon-teal"></i>
+            <h4>Pequeñas decisiones, grandes resultados.</h4>
+            <p>Tu futuro financiero comienza aquí.</p>
+        </div>
+
+        <div class="user-profile">
+            <div class="user-profile-avatar" id="sidebar-avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="user-info">
+                <h5 id="sidebar-nombre">Hola, Usuario</h5>
+                <p>Nivel 1 - Aprendiz Financiero</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+    <main class="main-content">
+        
+        <!-- Barra Superior -->
+        <header class="top-bar">
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Busca temas, consejos o herramientas...">
+            </div>
+            <div class="top-icons">
+                <i class="fa-regular fa-bell"></i>
+                <button class="cuenta-trigger" id="btn-abrir-auth" type="button" aria-label="Crear cuenta o iniciar sesión">
+                    <span class="cuenta-avatar"><i class="fa-solid fa-user"></i></span>
+                    <span class="cuenta-texto">
+                        <strong id="texto-usuario-estado">Crear cuenta</strong>
+                        <small id="subtexto-usuario">o Iniciar sesión</small>
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <section class="page-section">
+            <div class="page-header">
+                <div class="icon-box"><i class="fa-solid fa-gear"></i></div>
+                <div>
+                    <h4>CONFIGURACIÓN</h4>
+                    <h1>Ajusta tu experiencia</h1>
+                    <p>Personaliza tu nombre, la moneda y administra los datos que guarda este navegador.</p>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <h3><i class="fa-solid fa-user"></i> Perfil</h3>
+                <p class="sub">Este nombre se muestra en el saludo. La moneda se usa en toda la aplicación.</p>
+                <form class="tool-form" id="form-config">
+                    <div class="field">
+                        <label for="config-nombre">Nombre para mostrar</label>
+                        <input type="text" id="config-nombre" maxlength="60" placeholder="Ej. Ana">
+                    </div>
+                    <div class="field">
+                        <label for="config-moneda">Moneda</label>
+                        <select id="config-moneda">
+                            <option value="MXN">Peso mexicano (MXN)</option>
+                            <option value="USD">Dólar (USD)</option>
+                            <option value="EUR">Euro (EUR)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Guardar cambios <i class="fa-solid fa-check"></i></button>
+                    <p class="tool-mensaje" id="mensaje-config"></p>
+                </form>
+            </div>
+
+            <div class="tool-card">
+                <h3><i class="fa-solid fa-id-card"></i> Mi cuenta</h3>
+                <p class="sub">Inicia sesión o crea una cuenta para guardar tu avatar y tus datos en el servidor.</p>
+                <div class="config-cuenta">
+                    <strong id="config-cuenta-nombre">Aún no has iniciado sesión</strong>
+                    <span id="config-cuenta-email">Tu progreso se guarda en este navegador.</span>
+                </div>
+                <button type="button" class="btn-ghost" id="btn-config-cuenta"><i class="fa-solid fa-right-to-bracket"></i> Abrir mi cuenta</button>
+            </div>
+
+            <div class="tool-card">
+                <h3><i class="fa-solid fa-sliders"></i> Preferencias</h3>
+                <p class="sub">Elige cómo quieres usar FinanzaLab.</p>
+                <div class="toggle-item">
+                    <div class="toggle-texto">
+                        <h4>Animación 3D del cerdito</h4>
+                        <p>Muestra el cerdito animado en la página de inicio.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="config-animacion">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-item">
+                    <div class="toggle-texto">
+                        <h4>Consejos de FinanBot</h4>
+                        <p>Muestra sugerencias al abrir el asistente.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="config-consejos">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="tool-card danger-zone">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Zona de riesgo</h3>
+                <p class="sub">Borra los gastos, metas y ajustes guardados en este navegador. Esta acción no se puede deshacer.</p>
+                <button type="button" class="btn-danger" id="btn-borrar-datos"><i class="fa-solid fa-trash"></i> Borrar mis datos locales</button>
+                <p class="tool-mensaje" id="mensaje-datos"></p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== ASISTENTE INTELIGENTE (FINANBOT) ==================== -->
+    <div id="contenedor-asistente">
+        <div class="chat-widget" id="chat-widget">
+            <!-- Botón flotante -->
+            <button class="chat-toggle-btn" id="chat-toggle-btn" aria-label="Abrir asistente virtual FinanBot" aria-expanded="false">
+                <span class="chat-icono-abrir"><i class="fa-solid fa-robot"></i></span>
+                <span class="chat-icono-cerrar" hidden><i class="fa-solid fa-xmark"></i></span>
+                <span class="chat-badge-pulse"></span>
+            </button>
+
+            <!-- Ventana del chat -->
+            <section class="chat-ventana" id="chat-ventana" aria-hidden="true">
+                <header class="chat-header">
+                    <div class="chat-header-info">
+                        <div class="chat-avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div>
+                            <h3>FinanzaBot <span class="chat-tag">IA</span></h3>
+                            <p><span class="indicador-enlinea"></span> Tutor financiero virtual</p>
+                        </div>
+                    </div>
+                    <button class="chat-btn-cerrar" id="chat-btn-cerrar" aria-label="Cerrar chat"><i class="fa-solid fa-xmark"></i></button>
+                </header>
+
+                <div class="chat-mensajes" id="chat-mensajes">
+                    <div class="mensaje-chat mensaje-bot">
+                        <div class="mensaje-contenido">
+                            <p>¡Hola! Soy <strong>FinanzaBot</strong>, tu tutor de FinanzaLab.</p>
+                            <p>¿Tienes dudas sobre tus gastos, cómo crear un presupuesto o cómo empezar a ahorrar? Pregúntame con confianza.</p>
+                            <div class="chat-sugerencias">
+                                <button type="button" class="chip-sugerencia" data-pregunta="¿Cómo puedo identificar y reducir mis gastos hormiga?">Gastos hormiga</button>
+                                <button type="button" class="chip-sugerencia" data-pregunta="¿Cómo funciona la regla 50/30/20 para hacer un presupuesto personal?">Regla 50/30/20</button>
+                                <button type="button" class="chip-sugerencia" data-pregunta="¿Cómo calcular cuánto necesito para mi fondo de emergencia?">Fondo de emergencia</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="chat-formulario" id="chat-formulario">
+                    <input
+                        type="text"
+                        id="chat-input"
+                        placeholder="Escribe tu duda financiera..."
+                        autocomplete="off"
+                        maxlength="300"
+                        required
+                    >
+                    <button type="submit" id="chat-btn-enviar" aria-label="Enviar mensaje">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </section>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL DE CUENTA (REGISTRO / LOGIN) ==================== -->
+    <div class="modal-auth-overlay" id="modal-auth-overlay" hidden>
+        <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="auth-modal-titulo">
+            <button class="auth-card-cerrar" id="btn-cerrar-auth" type="button" aria-label="Cerrar"><i class="fa-solid fa-xmark"></i></button>
+
+            <div class="auth-card-cabecera">
+                <div class="perfil-avatar-editable">
+                    <div class="perfil-avatar" id="perfil-avatar"><i class="fa-solid fa-user"></i></div>
+                    <button type="button" class="btn-editar-avatar" id="btn-editar-avatar" aria-label="Editar foto o icono" title="Editar foto o icono">
+                        <i class="fa-solid fa-camera"></i>
+                    </button>
+                </div>
+                <h3 id="auth-modal-titulo">Portal de Estudiantes</h3>
+                <p>Toca la cámara para elegir tu avatar</p>
+            </div>
+
+            <div class="avatar-picker" id="avatar-picker" hidden>
+                <p class="avatar-picker-titulo">Constructor de avatar</p>
+                <div class="avatar-colores" id="avatar-colores"></div>
+                <div class="avatar-iconos" id="avatar-iconos"></div>
+                <label class="btn-subir-avatar" for="input-foto-avatar">
+                    <i class="fa-solid fa-upload"></i> Subir una foto
+                </label>
+                <input type="file" id="input-foto-avatar" accept="image/*" hidden>
+                <button type="button" class="btn-link-auth avatar-quitar" id="btn-quitar-avatar">Quitar y usar icono por defecto</button>
+            </div>
+
+            <div class="modal-auth-tabs" id="modal-auth-tabs">
+                <button type="button" class="tab-auth activo" id="tab-registro">Crear cuenta</button>
+                <button type="button" class="tab-auth" id="tab-login">Iniciar sesión</button>
+            </div>
+
+            <!-- FORMULARIO CREAR CUENTA -->
+            <form id="form-registro" class="form-auth">
+                <div class="form-field">
+                    <input type="text" id="reg-nombre" placeholder=" " maxlength="100" required>
+                    <label for="reg-nombre">Nombre completo</label>
+                </div>
+                <div class="form-field">
+                    <input type="email" id="reg-email" placeholder=" " maxlength="150" required>
+                    <label for="reg-email">Correo electrónico</label>
+                </div>
+                <div class="form-field">
+                    <input type="password" id="reg-password" placeholder=" " minlength="6" required>
+                    <label for="reg-password">Contraseña</label>
+                </div>
+
+                <button type="submit" class="btn-primary auth-submit" id="btn-submit-registro">Crear mi cuenta <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+
+            <!-- FORMULARIO INICIAR SESIÓN -->
+            <form id="form-login" class="form-auth" hidden>
+                <div class="form-field">
+                    <input type="email" id="login-email" placeholder=" " maxlength="150" required>
+                    <label for="login-email">Correo electrónico</label>
+                </div>
+                <div class="form-field">
+                    <input type="password" id="login-password" placeholder=" " required>
+                    <label for="login-password">Contraseña</label>
+                </div>
+
+                <div class="auth-enlace-recuperar">
+                    <button type="button" class="btn-link-auth" id="btn-abrir-recuperar">¿Olvidaste tu contraseña?</button>
+                </div>
+
+                <button type="submit" class="btn-primary auth-submit" id="btn-submit-login">Iniciar sesión <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+
+            <!-- FORMULARIO RECUPERAR CONTRASEÑA -->
+            <form id="form-recuperar" class="form-auth" hidden>
+                <p class="auth-instruccion">Ingresa tu correo registrado y define una nueva contraseña para recuperar el acceso a tu cuenta.</p>
+
+                <div class="form-field">
+                    <input type="email" id="rec-email" placeholder=" " maxlength="150" required>
+                    <label for="rec-email">Correo electrónico</label>
+                </div>
+                <div class="form-field">
+                    <input type="password" id="rec-password" placeholder=" " minlength="6" required>
+                    <label for="rec-password">Nueva contraseña</label>
+                </div>
+
+                <button type="submit" class="btn-primary auth-submit" id="btn-submit-recuperar">Restablecer contraseña <i class="fa-solid fa-arrow-right"></i></button>
+
+                <div class="auth-enlace-recuperar text-center">
+                    <button type="button" class="btn-link-auth" id="btn-volver-login"><i class="fa-solid fa-arrow-left"></i> Volver a Iniciar sesión</button>
+                </div>
+            </form>
+
+            <p class="auth-mensaje" id="auth-mensaje" role="status" aria-live="polite"></p>
+
+            <!-- VISTA DE SESIÓN ACTIVA -->
+            <div class="auth-perfil-activo" id="auth-perfil-activo" hidden>
+                <h4 id="perfil-nombre">Nombre del alumno</h4>
+                <p id="perfil-email">correo@ejemplo.com</p>
+                <span class="badge-estudiante">Alumno activo</span>
+                <button type="button" class="btn-secondary-auth" id="btn-cerrar-sesion">Cerrar mi sesión</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tu script principal (donde probablemente llamas a api/chat.php) -->
+    <script src="script.js?v=8"></script>
+
+</body>
+</html>

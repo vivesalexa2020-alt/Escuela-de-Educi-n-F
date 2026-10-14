@@ -60,7 +60,8 @@ switch ($action) {
         $user = [
             'id' => (int)$userId,
             'nombre' => $nombre,
-            'email' => $email
+            'email' => $email,
+            'avatar' => null
         ];
 
         $_SESSION['usuario'] = $user;
@@ -82,7 +83,7 @@ switch ($action) {
             exit;
         }
 
-        $stmt = $pdo->prepare('SELECT id, nombre, email, password FROM usuarios WHERE email = ?');
+        $stmt = $pdo->prepare('SELECT id, nombre, email, password, avatar FROM usuarios WHERE email = ?');
         $stmt->execute([$email]);
         $usuario = $stmt->fetch();
 
@@ -95,7 +96,8 @@ switch ($action) {
         $user = [
             'id' => (int)$usuario['id'],
             'nombre' => $usuario['nombre'],
-            'email' => $usuario['email']
+            'email' => $usuario['email'],
+            'avatar' => $usuario['avatar'] ?? null
         ];
 
         $_SESSION['usuario'] = $user;
@@ -142,6 +144,50 @@ switch ($action) {
         echo json_encode([
             'ok' => true,
             'mensaje' => '¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva contraseña.'
+        ], JSON_UNESCAPED_UNICODE);
+        break;
+
+    case 'actualizar_avatar':
+        if (empty($_SESSION['usuario'])) {
+            http_response_code(401);
+            echo json_encode(['ok' => false, 'error' => 'Debes iniciar sesión para cambiar tu avatar.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $avatar = trim((string)($data['avatar'] ?? ''));
+
+        // Permitir volver al icono por defecto
+        if ($avatar === '') {
+            $avatar = null;
+        } elseif (preg_match('/^icon:(fa-[a-z0-9-]+)$/', $avatar, $m)) {
+            // Icono de FontAwesome preestablecido
+            $avatar = 'icon:' . $m[1];
+        } elseif (preg_match('/^built:#([0-9a-fA-F]{6}):(fa-[a-z0-9-]+)$/', $avatar, $m)) {
+            // Avatar creado en el constructor: color de fondo + icono
+            $avatar = 'built:#' . strtolower($m[1]) . ':' . $m[2];
+        } elseif (preg_match('/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+\/=\r\n]+$/', $avatar)) {
+            // Foto subida y convertida a base64 (límite ~ 1.5 MB)
+            if (strlen($avatar) > 1600000) {
+                http_response_code(413);
+                echo json_encode(['ok' => false, 'error' => 'La imagen es demasiado grande.'], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+        } else {
+            http_response_code(400);
+            echo json_encode(['ok' => false, 'error' => 'El avatar proporcionado no es válido.'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        $update = $pdo->prepare('UPDATE usuarios SET avatar = ? WHERE id = ?');
+        $update->execute([$avatar, $_SESSION['usuario']['id']]);
+
+        $_SESSION['usuario']['avatar'] = $avatar;
+
+        echo json_encode([
+            'ok' => true,
+            'mensaje' => 'Avatar actualizado.',
+            'avatar' => $avatar,
+            'user' => $_SESSION['usuario']
         ], JSON_UNESCAPED_UNICODE);
         break;
 
