@@ -1281,6 +1281,46 @@ body {
     text-transform: uppercase;
 }
 
+.form-field.campo-invalido input {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.form-field.campo-invalido input:focus {
+    border-color: #ef4444;
+}
+
+.form-field.campo-invalido label,
+.form-field.campo-invalido input:focus + label,
+.form-field.campo-invalido input:not(:placeholder-shown) + label {
+    color: #ef4444;
+}
+
+.form-field.campo-valido input {
+    border-color: var(--accent-teal);
+}
+
+.form-field.campo-valido label,
+.form-field.campo-valido input:focus + label,
+.form-field.campo-valido input:not(:placeholder-shown) + label {
+    color: var(--accent-teal);
+}
+
+.mensaje-campo {
+    margin: 6px 2px 0;
+    font-size: 11.5px;
+    line-height: 1.35;
+    min-height: 15px;
+}
+
+.form-field.campo-invalido .mensaje-campo {
+    color: #ef4444;
+}
+
+.form-field.campo-valido .mensaje-campo {
+    color: var(--accent-teal);
+}
+
 .auth-submit {
     margin-top: 8px;
     width: 100%;

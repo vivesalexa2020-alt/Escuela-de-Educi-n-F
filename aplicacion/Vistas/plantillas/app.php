@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Hoja de estilos -->
-    <link rel="stylesheet" href="<?= $base ?>css/estilos.css?v=18">
+    <link rel="stylesheet" href="<?= $base ?>css/estilos.css?v=19">
 </head>
 <body>
 
@@ -38,7 +38,7 @@
     <?php require VIEW_PATH . '/parciales/auth-modal.php'; ?>
 
     <script>window.BASE_URL = <?= json_encode($base) ?>;</script>
-    <script src="<?= $base ?>js/script.js?v=10"></script>
+    <script src="<?= $base ?>js/script.js?v=11"></script>
 
     <?php foreach ($pageScripts as $pageScript): ?>
         <script src="<?= $base ?>js/<?= htmlspecialchars($pageScript, ENT_QUOTES, 'UTF-8') ?>"></script>

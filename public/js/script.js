@@ -998,6 +998,62 @@ document.addEventListener("DOMContentLoaded", () => {
     authMensaje.className = `auth-mensaje ${tipo}`.trim();
   }
 
+  function esCorreoValido(valor) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(valor || "").trim());
+  }
+
+  function inicializarValidacionCorreos() {
+    if (!modalAuthOverlay) return;
+
+    modalAuthOverlay.querySelectorAll('input[type="email"]').forEach(input => {
+      if (input.dataset.correoValidado === "true") return;
+      input.dataset.validado = "true";
+      input.setAttribute("inputmode", "email");
+      input.setAttribute("autocomplete", "email");
+
+      const contenedor = input.closest(".form-field");
+      let mensaje = contenedor?.querySelector(".mensaje-campo");
+      if (contenedor && !mensaje) {
+        mensaje = document.createElement("p");
+        mensaje.className = "mensaje-campo";
+        mensaje.setAttribute("aria-live", "polite");
+        contenedor.appendChild(mensaje);
+      }
+
+      const validar = () => {
+        const valor = input.value.trim();
+        const boton = input.closest("form")?.querySelector('button[type="submit"]');
+
+        if (valor === "") {
+          contenedor?.classList.remove("campo-valido", "campo-invalido");
+          if (mensaje) mensaje.textContent = "";
+          if (boton) boton.removeAttribute("disabled");
+          return;
+        }
+
+        const valido = esCorreoValido(valor);
+        contenedor?.classList.toggle("campo-valido", ok);
+        contenedor?.classList.toggle("campo-invalido", !ok);
+        if (mensaje) {
+          mensaje.textContent = ok
+            ? "Correo válido"
+            : "Ingresa un correo válido, por ejemplo nombre@dominio.com";
+        }
+        if (boton) {
+          if (ok) boton.removeAttribute("disabled");
+          else boton.setAttribute("disabled", "disabled");
+        }
+      };
+
+    input.addEventListener("input", validar);
+    input.addEventListener("blur", validar);
+    validar();
+  });
+  }
+
+  inicializarValidacionCorreos();
+
+
   function cambiarPestanaAuth(pestana) {
     mostrarMensajeAuth("");
     if (pestana === "recuperar") {
@@ -1089,6 +1145,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("reg-email")?.value.trim();
     const password = document.getElementById("reg-password")?.value;
 
+    if (!esCorreoValido(email)) {
+      document.getElementById("reg-email")?.focus();
+      mostrarMensajeAuth("Ingresa un correo electrónico válido (ejemplo: nombre@dominio.com).", "error");
+      return;
+    }
+
     mostrarMensajeAuth("Creando tu cuenta...", "");
 
     try {
@@ -1117,6 +1179,12 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const email = document.getElementById("login-email")?.value.trim();
     const password = document.getElementById("login-password")?.value;
+
+    if (!esCorreoValido(email)) {
+      document.getElementById("login-email")?.focus();
+      mostrarMensajeAuth("Ingresa un correo electrónico válido (ejemplo: nombre@dominio.com).", "error");
+      return;
+    }
 
     mostrarMensajeAuth("Validando credenciales...", "");
 
@@ -1158,6 +1226,12 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const email = document.getElementById("rec-email")?.value.trim();
     const password = document.getElementById("rec-password")?.value;
+
+    if (!esCorreoValido(email)) {
+      document.getElementById("rec-email")?.focus();
+      mostrarMensajeAuth("Ingresa un correo electrónico válido (ejemplo: nombre@dominio.com).", "error");
+      return;
+    }
 
     mostrarMensajeAuth("Actualizando tu contraseña...", "");
 
@@ -1729,6 +1803,7 @@ document.addEventListener("DOMContentLoaded", () => {
   aplicarConfig();
   bloquearCerdito();
   actualizarInicio();
+  inicializarValidacionCorreos();
   verificarSesionUsuario();
 });
 
