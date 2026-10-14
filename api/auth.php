@@ -1,7 +1,7 @@
 <?php
 /**
  * API de autenticación y registro de alumnos
- * Proyecto: FinanzaLab
+ * Proyecto: EduFin
  */
 
 if (session_status() === PHP_SESSION_NONE) {

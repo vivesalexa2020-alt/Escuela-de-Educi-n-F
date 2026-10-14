@@ -1,7 +1,7 @@
 <?php
 /**
  * FinanBot - Endpoint de chat con Google Gemini API
- * Proyecto: FinanzaLab
+ * Proyecto: EduFin
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -88,7 +88,7 @@ if (count($contents) > 10) {
 $systemInstruction = [
     'parts' => [
         [
-            'text' => "Eres FinanBot, el tutor inteligente y amigable de FinanzaLab, una escuela virtual de educación financiera para principiantes.\n\n"
+            'text' => "Eres FinanBot, el tutor inteligente y amigable de EduFin, una escuela virtual de educación financiera para principiantes.\n\n"
                     . "Tu misión es guiar a los estudiantes en temas clave:\n"
                     . "1. Control de gastos hormiga y cómo identificarlos.\n"
                     . "2. Hábitos de ahorro personal y metas realistas.\n"

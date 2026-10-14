@@ -1,6 +1,6 @@
 -- ========================================================
 -- Base de datos: finanzalab_db
--- Proyecto: FinanzaLab (Escuela de Educación Financiera)
+-- Proyecto: EduFin (Escuela de Educación Financiera)
 -- ========================================================
 
 CREATE DATABASE IF NOT EXISTS `finanzalab_db` 
@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
     `nombre` VARCHAR(100) NOT NULL,
     `email` VARCHAR(150) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
+    `avatar` TEXT NULL DEFAULT NULL,
     `fecha_registro` DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `gastos` (
     `usuario_id` INT NULL,
     `concepto` VARCHAR(100) NOT NULL,
     `importe` DECIMAL(10, 2) NOT NULL,
-    `categoria` ENUM('Comida y bebidas', 'Antojos', 'Transporte', 'Suscripciones', 'Otros') NOT NULL DEFAULT 'Otros',
+    `categoria` ENUM('Comida', 'Transporte', 'Entretenimiento', 'Compras', 'Servicios', 'Otros') NOT NULL DEFAULT 'Otros',
     `fecha` DATE NOT NULL,
     `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE

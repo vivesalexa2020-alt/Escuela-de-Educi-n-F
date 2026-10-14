@@ -718,7 +718,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       quitarEscribiendo();
       agregarMensaje(
-        "⚠️ No se pudo conectar con el servidor local. Asegúrate de tener Apache encendido en XAMPP y acceder mediante http://localhost/FinanzaLab/.",
+        "⚠️ No se pudo conectar con el servidor local. Asegúrate de tener Apache encendido en XAMPP y acceder mediante http://localhost/EduFin/.",
         "bot"
       );
     } finally {
@@ -745,6 +745,221 @@ document.addEventListener("DOMContentLoaded", () => {
       enviarPregunta(chip.dataset.pregunta);
     }
   });
+
+  // ========================================================
+  // BUSCADOR GLOBAL DE LA BARRA SUPERIOR
+  // ========================================================
+  const INDICE_BUSQUEDA = [
+    {
+      titulo: "Inicio",
+      descripcion: "Tu resumen, progreso y consejos del día.",
+      url: "index.html",
+      icono: "fa-house",
+      claves: "inicio panel dashboard resumen consejos progreso principal portada"
+    },
+    {
+      titulo: "Retícula académica",
+      descripcion: "Los tres niveles de aprendizaje financiero.",
+      url: "reticula.html",
+      icono: "fa-graduation-cap",
+      claves: "reticula niveles lecciones nivel curso clases aprender academia leccion inversion invertir riesgo rendimiento interes compuesto"
+    },
+    {
+      titulo: "Materiales",
+      descripcion: "Guías, plantillas y recursos descargables.",
+      url: "materiales.html",
+      icono: "fa-book-open",
+      claves: "materiales guias plantillas checklist glosario recursos descargar presupuesto 50/30/20 fondo de emergencia ahorro"
+    },
+    {
+      titulo: "Gastos hormiga",
+      descripcion: "Registra y controla tus pequeños gastos.",
+      url: "gastos-hormiga.html",
+      icono: "fa-wallet",
+      claves: "gastos hormiga registrar gasto cafe antojo compras controlar categorias comida transporte entretenimiento servicios historial"
+    },
+    {
+      titulo: "Mi ahorro",
+      descripcion: "Define y sigue tu meta de ahorro.",
+      url: "mi-ahorro.html",
+      icono: "fa-piggy-bank",
+      claves: "ahorro ahorrar alcancia alcancia cerdito guardar dinero meta depositar"
+    },
+    {
+      titulo: "Metas",
+      descripcion: "Crea y sigue tus metas financieras.",
+      url: "metas.html",
+      icono: "fa-bullseye",
+      claves: "metas objetivos meta ahorrar para proposito"
+    },
+    {
+      titulo: "Logros",
+      descripcion: "Tus insignias y recompensas.",
+      url: "logros.html",
+      icono: "fa-trophy",
+      claves: "logros insignias medallas premios recompensas trofeo"
+    },
+    {
+      titulo: "Configuración",
+      descripcion: "Cuenta, avatar, moneda y preferencias.",
+      url: "configuracion.html",
+      icono: "fa-gear",
+      claves: "configuracion ajustes cuenta perfil avatar moneda contrasena sesion opciones preferencias"
+    }
+  ];
+
+  function normalizarTexto(texto) {
+    return (texto || "")
+      .toString()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  }
+
+  function inicializarBuscador() {
+    const contenedor = document.querySelector(".search-bar");
+    const input = contenedor?.querySelector("input");
+    if (!contenedor || !input) return;
+
+    if (contenedor.dataset.buscadorListo === "true") return;
+    contenedor.dataset.buscadorListo = "true";
+
+    input.setAttribute("autocomplete", "off");
+    input.setAttribute("role", "combobox");
+    input.setAttribute("aria-expanded", "false");
+
+    const panel = document.createElement("div");
+    panel.className = "search-resultados";
+    panel.hidden = true;
+    panel.setAttribute("role", "listbox");
+    contenedor.appendChild(panel);
+
+    let resultados = [];
+    let seleccionado = -1;
+
+    function cerrarPanel() {
+      panel.hidden = true;
+      panel.innerHTML = "";
+      resultados = [];
+      seleccionado = -1;
+      input.setAttribute("aria-expanded", "false");
+    }
+
+    function paginasCoincidentes(consulta) {
+      const terminos = normalizarTexto(consulta).split(/\s+/).filter(Boolean);
+      if (!terminos.length) return [];
+      return INDICE_BUSQUEDA.filter(pagina => {
+        const texto = normalizarTexto(
+          `${pagina.titulo} ${pagina.descripcion} ${pagina.claves}`
+        );
+        return terminos.every(t => texto.includes(t));
+      });
+    }
+
+    function crearOpcionBot(consulta) {
+      const opcion = document.createElement("button");
+      opcion.type = "button";
+      opcion.className = "search-resultado search-resultado-bot";
+      opcion.dataset.bot = consulta;
+      opcion.setAttribute("role", "option");
+      opcion.innerHTML = `
+        <span class="search-resultado-icono"><i class="fa-solid fa-robot"></i></span>
+        <span class="search-resultado-texto">
+          <strong>Preguntar a FinanBot</strong>
+          <small>Consulta "${escaparHTML(consulta)}" con tu tutor virtual</small>
+        </span>`;
+      return opcion;
+    }
+
+    function renderizar(consulta) {
+      resultados = paginasCoincidentes(consulta);
+      seleccionado = -1;
+      panel.innerHTML = "";
+
+      if (!consulta.trim()) {
+        cerrarPanel();
+        return;
+      }
+
+      if (!resultados.length) {
+        const vacio = document.createElement("p");
+        vacio.className = "search-vacio";
+        vacio.textContent = `Sin resultados para "${consulta}"`;
+        panel.appendChild(vacio);
+      } else {
+        resultados.forEach((pagina, i) => {
+          const opcion = document.createElement("a");
+          opcion.href = pagina.url;
+          opcion.className = "search-resultado";
+          opcion.setAttribute("role", "option");
+          opcion.dataset.indice = String(i);
+          opcion.innerHTML = `
+            <span class="search-resultado-icono"><i class="fa-solid ${pagina.icono}"></i></span>
+            <span class="search-resultado-texto">
+              <strong>${escaparHTML(pagina.titulo)}</strong>
+              <small>${escaparHTML(pagina.descripcion)}</small>
+            </span>
+            <i class="fa-solid fa-arrow-right search-resultado-flecha"></i>`;
+          panel.appendChild(opcion);
+        });
+      }
+
+      panel.appendChild(crearOpcionBot(consulta));
+      panel.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+    }
+
+    function moverSeleccion(delta) {
+      if (!resultados.length) return;
+      seleccionado = (seleccionado + delta + resultados.length) % resultados.length;
+      panel.querySelectorAll(".search-resultado").forEach((elem, i) => {
+        const activo = i === seleccionado;
+        elem.classList.toggle("activo", activo);
+        if (activo) elem.scrollIntoView({ block: "nearest" });
+      });
+    }
+
+    input.addEventListener("input", () => renderizar(input.value));
+    input.addEventListener("focus", () => {
+      if (input.value.trim()) renderizar(input.value);
+    });
+
+    input.addEventListener("keydown", evento => {
+      if (evento.key === "ArrowDown") {
+        evento.preventDefault();
+        moverSeleccion(1);
+      } else if (evento.key === "ArrowUp") {
+        evento.preventDefault();
+        moverSeleccion(-1);
+      } else if (evento.key === "Escape") {
+        cerrarPanel();
+        input.blur();
+      } else if (evento.key === "Enter") {
+        const destino = seleccionado >= 0 ? resultados[seleccionado] : resultados[0];
+        if (destino) {
+          evento.preventDefault();
+          window.location.href = destino.url;
+        }
+      }
+    });
+
+    panel.addEventListener("click", evento => {
+      const botonBot = evento.target.closest(".search-resultado-bot");
+      if (!botonBot) return;
+      evento.preventDefault();
+      const consulta = botonBot.dataset.bot;
+      cerrarPanel();
+      input.value = "";
+      alternarChat(true);
+      enviarPregunta(consulta);
+    });
+
+    document.addEventListener("click", evento => {
+      if (!contenedor.contains(evento.target)) cerrarPanel();
+    });
+  }
+
+  inicializarBuscador();
 
   // ========================================================
   // CONTROLADOR DE CUENTA DE USUARIO (REGISTRO / LOGIN)
