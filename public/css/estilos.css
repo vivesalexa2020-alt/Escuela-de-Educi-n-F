@@ -2585,3 +2585,126 @@ body::after {
         gap: 14px;
     }
 }
+.notification-wrapper, .help-wrapper {
+  position: relative;
+}
+
+.icon-btn-notif, .icon-btn-help {
+  position: relative;
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.25s;
+  padding: 8px;
+}
+
+.icon-btn-notif:hover, .icon-btn-help:hover {
+  color: var(--accent-red);
+}
+
+.notif-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.notif-dropdown, .help-dropdown {
+  position: absolute;
+  top: 42px;
+  right: 0;
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: 0 20px 45px rgba(11,27,60,0.12);
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  display: none;
+  z-index: 60;
+}
+
+.notif-dropdown.active, .help-dropdown.active {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-header, .help-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.notif-header button {
+  background: none;
+  border: none;
+  color: var(--accent-blue);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--card-border-subtle);
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.notif-item:last-child {
+  border-bottom: none;
+}
+
+.notif-empty {
+  padding: 20px 16px;
+  color: var(--text-muted);
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.help-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.help-item {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  border-bottom: 1px solid var(--card-border-subtle);
+}
+
+.help-item:last-child {
+  border-bottom: none;
+}
+
+.help-item:hover {
+  background: var(--accent-blue-subtle);
+  color: var(--accent-blue);
+}

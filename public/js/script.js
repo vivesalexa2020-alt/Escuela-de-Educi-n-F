@@ -2119,3 +2119,40 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
+
+  // ========================================================
+  // NOTIFICACIONES Y AYUDA
+  // ========================================================
+  const btnNotif = document.getElementById('btn-notif');
+  const notifDropdown = document.getElementById('notif-dropdown');
+  const notifBadge = document.getElementById('notif-badge');
+  const notifList = document.getElementById('notif-list');
+  const btnClearNotif = document.getElementById('btn-clear-notif');
+  const btnHelp = document.getElementById('btn-help');
+  const helpDropdown = document.getElementById('help-dropdown');
+  const NOTIF_KEY = 'finanzalab_notificaciones';
+  function leerNotificaciones() {
+    try { const d = localStorage.getItem(NOTIF_KEY); return d ? JSON.parse(d) : []; }
+    catch { return []; }
+  }
+  function guardarNotificaciones(n) { try { localStorage.setItem(NOTIF_KEY, JSON.stringify(n)); } catch {} }
+  function renderNotificaciones() {
+    if (!notifList) return;
+    const n = leerNotificaciones();
+    notifList.innerHTML = '';
+    if (n.length === 0) {
+      const v = document.createElement('div'); v.className = 'notif-empty'; v.textContent = 'No tienes notificaciones nuevas';
+      notifList.appendChild(v); if (notifBadge) notifBadge.style.display = 'none'; return;
+    }
+    if (notifBadge) { notifBadge.textContent = String(n.length); notifBadge.style.display = 'flex'; }
+    n.slice(-5).reverse().forEach(item => { const el = document.createElement('div'); el.className = 'notif-item'; el.textContent = item.texto; notifList.appendChild(el); });
+  }
+  function pushNotificacion(texto) { const n = leerNotificaciones(); n.push({ id: Date.now(), texto }); guardarNotificaciones(n); renderNotificaciones(); }
+  btnNotif?.addEventListener('click', e => { e.stopPropagation(); notifDropdown?.classList.toggle('active'); helpDropdown?.classList.remove('active'); });
+  btnHelp?.addEventListener('click', e => { e.stopPropagation(); helpDropdown?.classList.toggle('active'); notifDropdown?.classList.remove('active'); });
+  btnClearNotif?.addEventListener('click', () => { guardarNotificaciones([]); renderNotificaciones(); });
+  document.querySelector('.help-item[data-action="open-chat"]')?.addEventListener('click', () => { helpDropdown?.classList.remove('active'); alternarChat(true); setTimeout(() => { document.getElementById('chat-input')?.focus(); }, 150); });
+  document.addEventListener('click', e => { if (!e.target.closest('.notification-wrapper')) notifDropdown?.classList.remove('active'); if (!e.target.closest('.help-wrapper')) helpDropdown?.classList.remove('active'); });
+  let notificacionesIniciales = 0;
+  function iniciarNotificaciones() { renderNotificaciones(); if (notificacionesIniciales) return; notificacionesIniciales = 1; const n = leerNotificaciones(); if (n.length === 0) pushNotificacion('Bienvenido a EduFin. ¡Empieza por tu primer gasto hormiga!'); }
+  setTimeout(iniciarNotificaciones, 800);
