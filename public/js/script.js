@@ -77,6 +77,117 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!Array.isArray(metas)) metas = [];
 
+  // ========================================================
+  // PERSISTENCIA: invitado (localStorage) o alumno (MySQL)
+  // ========================================================
+  let modoServidor = false;
+
+  function refrescarVistas() {
+    if (document.getElementById("lista-gastos")) actualizarGastos();
+    if (document.getElementById("ahorro-guardado")) actualizarAhorro();
+    if (document.querySelector("[data-leccion]")) actualizarBotonesLecciones();
+    if (document.getElementById("lista-metas")) renderMetas();
+    if (document.getElementById("badges-grid")) renderLogros();
+    actualizarInicio();
+  }
+
+  function cargarDatosLocales() {
+    gastos = leerDatos("finanzalab_gastos", []);
+    metaAhorro = leerDatos("finanzalab_meta", {
+      nombre: "",
+      objetivo: 0,
+      actual: 0
+    });
+    leccionesCompletadas = leerDatos("finanzalab_lecciones", []);
+    metas = leerDatos("finanzalab_metas", []);
+
+    if (!Array.isArray(gastos)) gastos = [];
+    if (!Array.isArray(leccionesCompletadas)) leccionesCompletadas = [];
+    if (!Array.isArray(metas)) metas = [];
+    if (typeof metaAhorro !== "object" || metaAhorro === null) {
+      metaAhorro = { nombre: "", objetivo: 0, actual: 0 };
+    }
+
+    refrescarVistas();
+  }
+
+  async function apiDatos(accion, payload = {}) {
+    const resp = await fetch(apiUrl("api/datos"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: accion, ...payload })
+    });
+    return resp.json();
+  }
+
+  function aplicarDatosServidor(data) {
+    gastos = Array.isArray(data.gastos) ? data.gastos : [];
+    metas = Array.isArray(data.metas) ? data.metas : [];
+    leccionesCompletadas = Array.isArray(data.lecciones)
+      ? data.lecciones.map(Number)
+      : [];
+    metaAhorro =
+      data.ahorro && typeof data.ahorro === "object"
+        ? {
+            nombre: data.ahorro.nombre || "",
+            objetivo: Number(data.ahorro.objetivo) || 0,
+            actual: Number(data.ahorro.actual) || 0
+          }
+        : { nombre: "", objetivo: 0, actual: 0 };
+
+    refrescarVistas();
+  }
+
+  function hayDatosLocales() {
+    return (
+      gastos.length > 0 ||
+      metas.length > 0 ||
+      leccionesCompletadas.length > 0 ||
+      Number(metaAhorro.objetivo) > 0
+    );
+  }
+
+  function servidorVacio(data) {
+    return (
+      (!data.gastos || data.gastos.length === 0) &&
+      (!data.metas || data.metas.length === 0) &&
+      (!data.lecciones || data.lecciones.length === 0) &&
+      (!data.ahorro || Number(data.ahorro.objetivo) <= 0)
+    );
+  }
+
+  let migracionEnCurso = false;
+
+  // Al iniciar sesión se cargan los datos del servidor. Si la cuenta es
+  // nueva y había datos guardados en el navegador, se importan una sola vez.
+  async function cargarDatosServidor() {
+    try {
+      const resp = await fetch(`${apiUrl("api/datos")}?action=cargar`);
+      const data = await resp.json();
+      if (!data.ok) return;
+
+      if (servidorVacio(data) && hayDatosLocales() && !migracionEnCurso) {
+        migracionEnCurso = true;
+        await apiDatos("migrar", {
+          gastos,
+          metas,
+          ahorro: metaAhorro,
+          lecciones: leccionesCompletadas
+        });
+        migracionEnCurso = false;
+
+        const resp2 = await fetch(`${apiUrl("api/datos")}?action=cargar`);
+        const data2 = await resp2.json();
+        if (data2.ok) aplicarDatosServidor(data2);
+        return;
+      }
+
+      aplicarDatosServidor(data);
+    } catch {
+      /* Sin conexión: se conservan los datos locales. */
+    }
+  }
+
   // MENÚ LATERAL Y MENÚ PARA CELULAR
   if (menuToggle && barraLateral) {
     menuToggle.addEventListener("click", () => {
@@ -276,14 +387,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   );
 
-  botonCompletar?.addEventListener("click", () => {
+  botonCompletar?.addEventListener("click", async () => {
     if (leccionActual === null) return;
 
     if (!leccionesCompletadas.includes(leccionActual)) {
       leccionesCompletadas.push(leccionActual);
       leccionesCompletadas.sort((a, b) => a - b);
 
-      if (!guardarDatos(
+      if (modoServidor) {
+        try {
+          const data = await apiDatos("completar_leccion", {
+            numero: leccionActual
+          });
+          if (!data.ok) throw new Error();
+          leccionesCompletadas = Array.isArray(data.lecciones)
+            ? data.lecciones.map(Number)
+            : leccionesCompletadas;
+        } catch {
+          leccionesCompletadas = leccionesCompletadas.filter(
+            n => n !== leccionActual
+          );
+          alert("No se pudo guardar el progreso en el servidor. Revisa tu conexión.");
+          return;
+        }
+      } else if (!guardarDatos(
         "finanzalab_lecciones",
         leccionesCompletadas
       )) {
@@ -307,7 +434,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const listaGastos = document.getElementById("lista-gastos");
   const mensajeGasto = document.getElementById("mensaje-gasto");
 
-  formularioGasto?.addEventListener("submit", evento => {
+  formularioGasto?.addEventListener("submit", async evento => {
     evento.preventDefault();
 
     const concepto = campoConcepto.value.trim();
@@ -334,7 +461,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     gastos.unshift(nuevoGasto);
 
-    if (!guardarDatos("finanzalab_gastos", gastos)) {
+    if (modoServidor) {
+      try {
+        const data = await apiDatos("crear_gasto", {
+          concepto: nuevoGasto.concepto,
+          importe: nuevoGasto.importe,
+          categoria: nuevoGasto.categoria,
+          fecha: nuevoGasto.fecha
+        });
+        if (!data.ok || !data.gasto) throw new Error();
+        Object.assign(nuevoGasto, data.gasto);
+      } catch {
+        gastos.shift();
+        mensajeGasto.textContent =
+          "No se pudo guardar el gasto en el servidor.";
+        return;
+      }
+    } else if (!guardarDatos("finanzalab_gastos", gastos)) {
       gastos.shift();
       mensajeGasto.textContent =
         "No se pudo guardar el gasto en este navegador.";
@@ -421,12 +564,22 @@ document.addEventListener("DOMContentLoaded", () => {
         `Eliminar gasto ${gasto.concepto}`
       );
 
-      eliminar.addEventListener("click", () => {
+      eliminar.addEventListener("click", async () => {
         const gastosAnteriores = gastos;
 
         gastos = gastos.filter(item => item.id !== gasto.id);
 
-        if (!guardarDatos("finanzalab_gastos", gastos)) {
+        if (modoServidor) {
+          try {
+            const data = await apiDatos("eliminar_gasto", { id: gasto.id });
+            if (!data.ok) throw new Error();
+          } catch {
+            gastos = gastosAnteriores;
+            mensajeGasto.textContent =
+              "No se pudo eliminar el gasto.";
+            return;
+          }
+        } else if (!guardarDatos("finanzalab_gastos", gastos)) {
           gastos = gastosAnteriores;
           mensajeGasto.textContent =
             "No se pudo eliminar el gasto.";
@@ -446,7 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // BORRAR HISTORIAL DE GASTOS
   document.getElementById("borrar-gastos")?.addEventListener(
     "click",
-    () => {
+    async () => {
       if (gastos.length === 0) {
         mensajeGasto.textContent = "No hay gastos que borrar.";
         return;
@@ -461,7 +614,17 @@ document.addEventListener("DOMContentLoaded", () => {
       const anteriores = gastos;
       gastos = [];
 
-      if (!guardarDatos("finanzalab_gastos", gastos)) {
+      if (modoServidor) {
+        try {
+          const data = await apiDatos("borrar_gastos");
+          if (!data.ok) throw new Error();
+        } catch {
+          gastos = anteriores;
+          mensajeGasto.textContent =
+            "No se pudo borrar el historial.";
+          return;
+        }
+      } else if (!guardarDatos("finanzalab_gastos", gastos)) {
         gastos = anteriores;
         mensajeGasto.textContent =
           "No se pudo borrar el historial.";
@@ -525,7 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
     campoAhorroActual.value = actual || "";
   }
 
-  formularioAhorro?.addEventListener("submit", evento => {
+  formularioAhorro?.addEventListener("submit", async evento => {
     evento.preventDefault();
 
     const nombre = campoMetaNombre.value.trim();
@@ -546,9 +709,31 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const metaAnterior = metaAhorro;
     metaAhorro = { nombre, objetivo, actual };
 
-    if (!guardarDatos("finanzalab_meta", metaAhorro)) {
+    if (modoServidor) {
+      try {
+        const data = await apiDatos("guardar_ahorro", {
+          nombre,
+          objetivo,
+          actual
+        });
+        if (!data.ok) throw new Error();
+        if (data.ahorro) {
+          metaAhorro = {
+            nombre: data.ahorro.nombre || nombre,
+            objetivo: Number(data.ahorro.objetivo) || objetivo,
+            actual: Number(data.ahorro.actual) || actual
+          };
+        }
+      } catch {
+        metaAhorro = metaAnterior;
+        mensajeAhorro.textContent =
+          "No se pudo guardar tu meta en el servidor.";
+        return;
+      }
+    } else if (!guardarDatos("finanzalab_meta", metaAhorro)) {
       mensajeAhorro.textContent =
         "No se pudo guardar tu meta en este navegador.";
       return;
@@ -1007,7 +1192,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modalAuthOverlay.querySelectorAll('input[type="email"]').forEach(input => {
       if (input.dataset.correoValidado === "true") return;
-      input.dataset.validado = "true";
+      input.dataset.correoValidado = "true";
       input.setAttribute("inputmode", "email");
       input.setAttribute("autocomplete", "email");
 
@@ -1032,15 +1217,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const valido = esCorreoValido(valor);
-        contenedor?.classList.toggle("campo-valido", ok);
-        contenedor?.classList.toggle("campo-invalido", !ok);
+        contenedor?.classList.toggle("campo-valido", valido);
+        contenedor?.classList.toggle("campo-invalido", !valido);
         if (mensaje) {
-          mensaje.textContent = ok
+          mensaje.textContent = valido
             ? "Correo válido"
             : "Ingresa un correo válido, por ejemplo nombre@dominio.com";
         }
         if (boton) {
-          if (ok) boton.removeAttribute("disabled");
+          if (valido) boton.removeAttribute("disabled");
           else boton.setAttribute("disabled", "disabled");
         }
       };
@@ -1051,7 +1236,75 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   }
 
-  inicializarValidacionCorreos();
+  function esPasswordValida(valor) {
+    return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6}$/.test(String(valor || ""));
+  }
+
+  function inicializarTogglePassword() {
+    if (!modalAuthOverlay) return;
+
+    modalAuthOverlay.querySelectorAll(".toggle-password").forEach(boton => {
+      if (boton.dataset.toggleListo === "true") return;
+      boton.dataset.toggleListo = "true";
+
+      boton.addEventListener("click", () => {
+        const input = document.getElementById(boton.dataset.target);
+        if (!input) return;
+
+        const mostrando = input.type === "text";
+        input.type = mostrando ? "password" : "text";
+        boton.setAttribute("aria-pressed", String(!mostrando));
+        boton.setAttribute("aria-label", mostrando ? "Mostrar contraseña" : "Ocultar contraseña");
+
+        const icono = boton.querySelector("i");
+        if (icono) {
+          icono.classList.toggle("fa-eye", mostrando);
+          icono.classList.toggle("fa-eye-slash", !mostrando);
+        }
+      });
+    });
+  }
+
+  function inicializarValidacionPasswords() {
+    if (!modalAuthOverlay) return;
+
+    modalAuthOverlay.querySelectorAll('input[type="password"]').forEach(input => {
+      if (input.dataset.passwordValidada === "true") return;
+      input.dataset.passwordValidada = "true";
+
+      const contenedor = input.closest(".form-field");
+      let mensaje = contenedor?.querySelector(".mensaje-campo");
+      if (contenedor && !mensaje) {
+        mensaje = document.createElement("p");
+        mensaje.className = "mensaje-campo";
+        mensaje.setAttribute("aria-live", "polite");
+        contenedor.appendChild(mensaje);
+      }
+
+      const validar = () => {
+        const valor = input.value;
+
+        if (valor === "") {
+          contenedor?.classList.remove("campo-valido", "campo-invalido");
+          if (mensaje) mensaje.textContent = "";
+          return;
+        }
+
+        const valido = esPasswordValida(valor);
+        contenedor?.classList.toggle("campo-valido", valido);
+        contenedor?.classList.toggle("campo-invalido", !valido);
+        if (mensaje) {
+          mensaje.textContent = valido
+            ? "Contraseña válida"
+            : "Debe tener 6 caracteres, con al menos una letra y un número";
+        }
+      };
+
+      input.addEventListener("input", validar);
+      input.addEventListener("blur", validar);
+      validar();
+    });
+  }
 
 
   function cambiarPestanaAuth(pestana) {
@@ -1080,6 +1333,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function actualizarUIUsuario(user) {
     usuarioActual = user;
+    modoServidor = Boolean(user);
     if (user) {
       if (textoUsuarioEstado) textoUsuarioEstado.textContent = `Hola, ${user.nombre.split(" ")[0]}`;
       if (subtextoUsuario) subtextoUsuario.textContent = "Alumno activo ✦";
@@ -1113,6 +1367,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const avatar = user && user.avatar ? user.avatar : leerAvatarLocal();
     aplicarAvatar(avatar);
+
+    if (user) {
+      cargarDatosServidor();
+    } else {
+      cargarDatosLocales();
+    }
   }
 
   function abrirModalAuth() {
@@ -1148,6 +1408,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!esCorreoValido(email)) {
       document.getElementById("reg-email")?.focus();
       mostrarMensajeAuth("Ingresa un correo electrónico válido (ejemplo: nombre@dominio.com).", "error");
+      return;
+    }
+
+    if (!esPasswordValida(password)) {
+      document.getElementById("reg-password")?.focus();
+      mostrarMensajeAuth("La contraseña debe tener 6 caracteres, combinando letras y números.", "error");
       return;
     }
 
@@ -1230,6 +1496,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!esCorreoValido(email)) {
       document.getElementById("rec-email")?.focus();
       mostrarMensajeAuth("Ingresa un correo electrónico válido (ejemplo: nombre@dominio.com).", "error");
+      return;
+    }
+
+    if (!esPasswordValida(password)) {
+      document.getElementById("rec-password")?.focus();
+      mostrarMensajeAuth("La nueva contraseña debe tener 6 caracteres, combinando letras y números.", "error");
       return;
     }
 
@@ -1628,9 +1900,22 @@ document.addEventListener("DOMContentLoaded", () => {
       eliminar.className = "icon-btn";
       eliminar.innerHTML = '<i class="fa-solid fa-trash"></i>';
       eliminar.setAttribute("aria-label", `Eliminar meta ${meta.nombre}`);
-      eliminar.addEventListener("click", () => {
+      eliminar.addEventListener("click", async () => {
+        const metasAnteriores = metas;
         metas = metas.filter(m => m.id !== meta.id);
-        guardarDatos("finanzalab_metas", metas);
+
+        if (modoServidor) {
+          try {
+            const data = await apiDatos("eliminar_meta", { id: meta.id });
+            if (!data.ok) throw new Error();
+          } catch {
+            metas = metasAnteriores;
+            return;
+          }
+        } else {
+          guardarDatos("finanzalab_metas", metas);
+        }
+
         renderMetas();
         actualizarInicio();
       });
@@ -1650,7 +1935,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (elCompletadas) elCompletadas.textContent = String(completadas);
   }
 
-  document.getElementById("form-meta")?.addEventListener("submit", evento => {
+  document.getElementById("form-meta")?.addEventListener("submit", async evento => {
     evento.preventDefault();
 
     const mensajeMeta = document.getElementById("mensaje-meta");
@@ -1674,9 +1959,33 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    metas.push({ id: `meta-${Date.now()}`, nombre, objetivo: monto, actual });
+    const nuevaMeta = {
+      id: `meta-${Date.now()}`,
+      nombre,
+      objetivo: monto,
+      actual
+    };
+    metas.push(nuevaMeta);
 
-    if (!guardarDatos("finanzalab_metas", metas)) {
+    if (modoServidor) {
+      try {
+        const data = await apiDatos("crear_meta", {
+          nombre,
+          objetivo: monto,
+          actual
+        });
+        if (!data.ok || !data.meta) throw new Error();
+        Object.assign(nuevaMeta, data.meta);
+      } catch {
+        metas.pop();
+        if (mensajeMeta) {
+          mensajeMeta.textContent =
+            "No se pudo guardar la meta en el servidor.";
+          mensajeMeta.classList.add("error");
+        }
+        return;
+      }
+    } else if (!guardarDatos("finanzalab_metas", metas)) {
       metas.pop();
       if (mensajeMeta) {
         mensajeMeta.textContent = "No se pudo guardar la meta.";
@@ -1804,6 +2113,8 @@ document.addEventListener("DOMContentLoaded", () => {
   bloquearCerdito();
   actualizarInicio();
   inicializarValidacionCorreos();
+  inicializarTogglePassword();
+  inicializarValidacionPasswords();
   verificarSesionUsuario();
 });
 

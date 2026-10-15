@@ -54,8 +54,8 @@ class AuthController extends Controller
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $this->json(['ok' => false, 'error' => 'El formato del correo electrónico no es válido.'], 400);
         }
-        if (strlen($password) < 6) {
-            $this->json(['ok' => false, 'error' => 'La contraseña debe contener al menos 6 caracteres.'], 400);
+        if (!$this->passwordValida($password)) {
+            $this->json(['ok' => false, 'error' => 'La contraseña debe tener 6 caracteres, combinando letras y números.'], 400);
         }
 
         $usuarios = new Usuario();
@@ -104,10 +104,9 @@ class AuthController extends Controller
         if ($email === '' || $nuevaPassword === '') {
             $this->json(['ok' => false, 'error' => 'Por favor ingresa tu correo y la nueva contraseña.'], 400);
         }
-        if (strlen($nuevaPassword) < 6) {
-            $this->json(['ok' => false, 'error' => 'La nueva contraseña debe tener al menos 6 caracteres.'], 400);
+        if (!$this->passwordValida($nuevaPassword)) {
+            $this->json(['ok' => false, 'error' => 'La nueva contraseña debe tener 6 caracteres, combinando letras y números.'], 400);
         }
-
         $usuarios = new Usuario();
         $usuario = $usuarios->buscarPorEmail($email);
         if ($usuario === null) {
@@ -116,6 +115,14 @@ class AuthController extends Controller
 
         $usuarios->actualizarPassword((int) $usuario['id'], $nuevaPassword);
         $this->json(['ok' => true, 'mensaje' => '¡Contraseña actualizada con éxito! Ya puedes iniciar sesión con tu nueva contraseña.']);
+    }
+
+    /**
+     * Regla de contraseña: exactamente 6 caracteres, combinando letras y números.
+     */
+    private function passwordValida(string $password): bool
+    {
+        return (bool) preg_match('/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6}$/', $password);
     }
 
     /** @param array<string, mixed> $data */

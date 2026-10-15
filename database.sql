@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `metas_ahorro` (
     `nombre` VARCHAR(100) NOT NULL,
     `objetivo` DECIMAL(10, 2) NOT NULL,
     `actual` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    `tipo` ENUM('ahorro', 'meta') NOT NULL DEFAULT 'meta',
     `estado` ENUM('en_progreso', 'completada') DEFAULT 'en_progreso',
     `actualizado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
@@ -59,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `progreso_lecciones` (
     `numero_nivel` INT NOT NULL,
     `completada` BOOLEAN DEFAULT TRUE,
     `fecha_completada` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `uq_usuario_nivel` (`usuario_id`, `numero_nivel`),
     FOREIGN KEY (`usuario_id`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -70,3 +72,13 @@ INSERT INTO `lecciones` (`numero_nivel`, `titulo`, `descripcion`, `actividad`) V
 (2, 'Construye tu hábito de ahorro', 'Ahorrar consiste en reservar dinero para una meta futura. La cantidad debe adaptarse a tus posibilidades y a tus gastos esenciales.', 'Crea una meta en la herramienta de ahorro. Escribe para qué quieres ahorrar y cuánto necesitas reunir.'),
 (3, 'Conoce las inversiones', 'Invertir significa colocar dinero en una opción que puede generar rendimientos, pero también puede ocasionar pérdidas. Antes de decidir, conoce sus condiciones y riesgos.', 'Escribe la diferencia entre ahorrar e invertir. Recuerda que ningún rendimiento está garantizado.')
 ON DUPLICATE KEY UPDATE `titulo` = VALUES(`titulo`), `descripcion` = VALUES(`descripcion`), `actividad` = VALUES(`actividad`);
+
+-- --------------------------------------------------------
+-- Migración para bases de datos creadas antes de conectar
+-- las herramientas (gastos, metas y lecciones) a MySQL.
+-- Ejecuta estas sentencias solo si ya tenías las tablas creadas:
+-- --------------------------------------------------------
+-- ALTER TABLE `metas_ahorro`
+--     ADD COLUMN `tipo` ENUM('ahorro', 'meta') NOT NULL DEFAULT 'meta' AFTER `actual`;
+-- ALTER TABLE `progreso_lecciones`
+--     ADD UNIQUE KEY `uq_usuario_nivel` (`usuario_id`, `numero_nivel`);

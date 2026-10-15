@@ -40,9 +40,14 @@
                     <input type="email" id="reg-email" placeholder=" " maxlength="150" required>
                     <label for="reg-email">Correo electrónico</label>
                 </div>
-                <div class="form-field">
-                    <input type="password" id="reg-password" placeholder=" " minlength="6" required>
-                    <label for="reg-password">Contraseña</label>
+                <div class="form-field campo-password">
+                    <div class="password-wrap">
+                        <input type="password" id="reg-password" placeholder=" " minlength="6" maxlength="6" autocomplete="new-password" required>
+                        <label for="reg-password">Contraseña</label>
+                        <button type="button" class="toggle-password" data-target="reg-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary auth-submit" id="btn-submit-registro">Crear mi cuenta <i class="fa-solid fa-arrow-right"></i></button>
@@ -54,9 +59,14 @@
                     <input type="email" id="login-email" placeholder=" " maxlength="150" required>
                     <label for="login-email">Correo electrónico</label>
                 </div>
-                <div class="form-field">
-                    <input type="password" id="login-password" placeholder=" " required>
-                    <label for="login-password">Contraseña</label>
+                <div class="form-field campo-password">
+                    <div class="password-wrap">
+                        <input type="password" id="login-password" placeholder=" " autocomplete="current-password" required>
+                        <label for="login-password">Contraseña</label>
+                        <button type="button" class="toggle-password" data-target="login-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="auth-enlace-recuperar">
@@ -74,9 +84,14 @@
                     <input type="email" id="rec-email" placeholder=" " maxlength="150" required>
                     <label for="rec-email">Correo electrónico</label>
                 </div>
-                <div class="form-field">
-                    <input type="password" id="rec-password" placeholder=" " minlength="6" required>
-                    <label for="rec-password">Nueva contraseña</label>
+                <div class="form-field campo-password">
+                    <div class="password-wrap">
+                        <input type="password" id="rec-password" placeholder=" " minlength="6" maxlength="6" autocomplete="new-password" required>
+                        <label for="rec-password">Nueva contraseña</label>
+                        <button type="button" class="toggle-password" data-target="rec-password" aria-label="Mostrar contraseña" aria-pressed="false">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-primary auth-submit" id="btn-submit-recuperar">Restablecer contraseña <i class="fa-solid fa-arrow-right"></i></button>

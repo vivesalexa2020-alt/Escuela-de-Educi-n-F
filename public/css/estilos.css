@@ -1321,6 +1321,42 @@ body {
     color: var(--accent-teal);
 }
 
+.password-wrap {
+    position: relative;
+}
+
+.form-field.campo-password .password-wrap input {
+    padding-right: 46px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+}
+
+.toggle-password:hover {
+    color: var(--accent-teal);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.toggle-password:focus-visible {
+    outline: 2px solid var(--accent-teal);
+    outline-offset: 1px;
+}
+
 .auth-submit {
     margin-top: 8px;
     width: 100%;

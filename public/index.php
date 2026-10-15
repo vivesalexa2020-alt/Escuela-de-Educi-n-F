@@ -27,5 +27,7 @@ $router->get('/configuracion', 'PageController@configuracion');
 $router->get('/api/auth', 'AuthController@handle');
 $router->post('/api/auth', 'AuthController@handle');
 $router->post('/api/chat', 'ChatController@handle');
+$router->get('/api/datos', 'DatosController@handle');
+$router->post('/api/datos', 'DatosController@handle');
 
 $router->dispatch();
