@@ -1557,7 +1557,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnQuitarAvatar = document.getElementById("btn-quitar-avatar");
 
   const AVATAR_KEY = "finanzalab_avatar";
-  const COLOR_DEFECTO = "#00D2C6";
+  const COLOR_DEFECTO = "#FF1E40";
   let colorAvatar = COLOR_DEFECTO;
   let avatarActual = null;
 
@@ -1573,8 +1573,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   const COLORES_AVATAR = [
-    "#00D2C6", "#3B82F6", "#8B5CF6", "#EC4899", "#F59E0B", "#EF4444",
-    "#10B981", "#F97316", "#06B6D4", "#FACC15", "#64748B", "#1F2937"
+    "#FF1E40", "#0066FF", "#0A1931", "#3B82F6", "#8B5CF6", "#EC4899",
+    "#10B981", "#F97316", "#F59E0B", "#06B6D4", "#64748B", "#1F2937"
   ];
 
   const ICONOS_AVATAR = [

@@ -42,16 +42,16 @@
             <div class="tool-card">
                 <h3><i class="fa-solid fa-sliders"></i> Preferencias</h3>
                 <p class="sub">Elige cómo quieres usar EduFin.</p>
-                <div class="toggle-item">
-                    <div class="toggle-texto">
-                        <h4>Animación 3D del cerdito</h4>
-                        <p>Muestra el cerdito animado en la página de inicio.</p>
+                    <div class="toggle-item" style="display:none;">
+                        <div class="toggle-texto">
+                            <h4>Animación 3D</h4>
+                            <p>Opción deshabilitada</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="config-animacion" disabled>
+                            <span class="slider"></span>
+                        </label>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="config-animacion">
-                        <span class="slider"></span>
-                    </label>
-                </div>
                 <div class="toggle-item">
                     <div class="toggle-texto">
                         <h4>Consejos de FinanBot</h4>

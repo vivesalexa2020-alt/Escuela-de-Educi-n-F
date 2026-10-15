@@ -75,10 +75,11 @@ class Router
         echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'
             . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
             . '<title>404 - EduFin</title>'
-            . '<style>body{font-family:system-ui,sans-serif;background:#0B132B;color:#fff;'
+            . '<style>body{font-family:\'Outfit\',system-ui,sans-serif;background:#F0F4FC;color:#0D1E3A;'
             . 'display:flex;height:100vh;align-items:center;justify-content:center;text-align:center}'
-            . 'a{color:#00D2C6}</style></head><body><div>'
-            . '<h1>404</h1><p>La página que buscas no existe.</p>'
+            . 'h1{font-size:3rem;margin-bottom:8px;color:#FF1E40}'
+            . 'a{color:#0066FF;font-weight:600;text-decoration:none}a:hover{text-decoration:underline}</style></head><body><div>'
+            . '<h1>404</h1><p style="margin-bottom:14px;color:#64748B">La página que buscas no existe.</p>'
             . '<p><a href="' . BASE_URL . '">Volver al inicio</a></p>'
             . '</div></body></html>';
     }

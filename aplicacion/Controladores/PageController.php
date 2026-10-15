@@ -16,7 +16,6 @@ class PageController extends Controller
         $this->view('home', [
             'title' => 'EduFin - Escuela Financiera',
             'active' => 'inicio',
-            'pageScripts' => ['three.min.js', 'piggy-3d.js'],
         ]);
     }
 
