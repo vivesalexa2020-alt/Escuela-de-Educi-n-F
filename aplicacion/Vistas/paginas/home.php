@@ -34,7 +34,12 @@
             </div>
 
             <div class="hero-visual" aria-hidden="true">
-                <img src="<?= $base ?>img/images.jpg" alt="Ilustración de ahorro" style="width:100%;max-width:420px;border-radius:20px;box-shadow:0 20px 60px rgba(0,210,198,0.25);">
+                <div class="coin-farm">
+                    <div class="coin-farm-bg"></div>
+                    <div class="piggy-large"></div>
+                    <div class="coin-slot"></div>
+                    <div class="coin-stream"></div>
+                </div>
             </div>
 
         </section>
